@@ -1,0 +1,8 @@
+#app-name-text {
+    position: relative;
+}
+#app-name-text span {
+    position: absolute;
+    font-size: x-small;
+    bottom: -24%;
+}

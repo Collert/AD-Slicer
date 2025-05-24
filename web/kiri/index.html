@@ -16,10 +16,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta http-equiv="origin-trial" content="Aixo1di7jfA+ystPFy70vGYyODYVAju1y8EQWwdkdtl5sB7i990oDCnqLQntpfl7NsW74wz99Og7xgQqeLKiBQsAAAB0eyJvcmlnaW4iOiJodHRwczovL2dyaWQuc3BhY2U6NDQzIiwiZmVhdHVyZSI6IlVucmVzdHJpY3RlZFNoYXJlZEFycmF5QnVmZmVyIiwiZXhwaXJ5IjoxNzUzMTQyNDAwLCJpc1N1YmRvbWFpbiI6dHJ1ZX0=">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Kiri:Moto</title>
+    <title>AD Slicer</title>
     <link rel="icon" href="/kiri/favicon.ico">
     <link rel="apple-touch-icon" href="/kiri/favicon-mobile.png">
     <link rel="stylesheet" type="text/css" href="/kiri/index.css?{{version}}">
+    <link rel="stylesheet" href="new-styles.css">
     <link href="/font/css/all.min.css" rel="stylesheet">
     <link href="/kiri/manifest.json" rel="manifest">
     <script src="/code/cache.js?{{version}}" defer></script>
@@ -29,14 +30,14 @@
 <body>
 <div id="app" class="f-col">
     <!-- hide page contents and provide loading message during initialization -->
-    <div id="curtain" class="j-center a-center"><img id="loading">Kiri:Moto is Loading</div>
+    <div id="curtain" class="j-center a-center"><img id="loading">AD-Slicer is Loading</div>
 
     <!-- when running iframed, provide a separator between the menu bar and enclosing page -->
     <div id="top-sep"></div>
 
     <!-- top menu bar -->
     <div id="top" class="f-row">
-        <div class="f-row top-menu">
+        <div style="display: none;" class="f-row top-menu">
             <span id="view-arrange">
                 <span><i class="fas fa-shapes"></i></span>
                 <label lk="arrange">arrange</label>
@@ -61,7 +62,9 @@
         <div class="grow"></div>
         <div id="app-name" class="f-col a-center top-menu">
             <span class="grow">
-                <span id="app-name-text" class="km-font">Kiri:Moto</span>
+                <span id="app-name-text" class="km-font">AD-Slicer
+                    <span>Powered by Kiri:Moto</span>
+                </span>
                 <div id="app-name-pop" class="top-menu-drop top-menu-center">
                     <div class="content">
                         <div id="app-help">
@@ -154,7 +157,7 @@
                     </div>
                 </div>
             </span>
-            <span>
+            <span style="display: none;">
                 <i class="fas fa-code-branch"></i>
                 <label>mode</label>
                 <div class="top-menu-drop top-menu-right">
@@ -196,11 +199,11 @@
                 <label>setup</label>
                 <div class="top-menu-drop top-menu-right">
                     <div class="content">
-                        <div id="set-device">
+                        <div style="display: none;" id="set-device">
                             <label lk="machines">machines</label>
                             <span><i class="fas fa-cube"></i></span>
                         </div>
-                        <div id="set-profs">
+                        <div style="display: none;" id="set-profs">
                             <label lk="profs">profiles</label>
                             <span><i class="fas fa-sliders-h"></i></span>
                         </div>
@@ -239,7 +242,7 @@
     <!-- toolbar with mesh and rendering options -->
     <div>
         <div id="render-tools">
-            <span id="tool-nozzle"><i class="fas fa-location-pin" title="extruder"></i>
+            <span style="display: none;" id="tool-nozzle"><i class="fas fa-location-pin" title="extruder"></i>
                 <div id="ft-nozzle" class="f-col pop"></div>
             </span>
             <span id="tool-rotate"><i class="fas fa-rotate-right" title="rotate selection"></i>
@@ -301,23 +304,23 @@
                 <i class="fas fa-arrows-down-to-line"></i>
                 <div class="pop">choose a face to place<br>on the work surface</div>
             </span>
-            <span id="context-setfocus" xlk="rc_focs">
+            <span hidden id="context-setfocus" xlk="rc_focs">
                 <i class="fas fa-eye"></i>
                 <div class="pop">choose focal point<br>camera orbit center</div>
             </span>
-            <span id="render-solid" class="j-center">
+            <span hidden id="render-solid" class="j-center">
                 <i class="fas fa-square"></i>
                 <div class="pop">render objects solid</div>
             </span>
-            <span id="render-wire" class="j-center">
+            <span hidden id="render-wire" class="j-center">
                 <i class="fas fa-border-all"></i>
                 <div class="pop">render objects wireframe</div>
             </span>
-            <span id="render-ghost" class="a-center">
+            <span hidden id="render-ghost" class="a-center">
                 <i class="fas fa-border-none"></i>
                 <div class="pop">render objects transparent</div>
             </span>
-            <span id="render-edges" class="a-center">
+            <span hidden id="render-edges" class="a-center">
                 <i class="fa-regular fa-square"></i>
                 <div class="pop">trace edges</div>
             </span>
@@ -327,7 +330,7 @@
     <div id="mid" class="grow f-row">
 
         <!-- left settings menu -->
-        <div id="panel-left" class="f-col j-left">
+        <div style="display: none;" id="panel-left" class="f-col j-left">
             <!-- <div class="line-sep2"></div> -->
             <div id="slide-show"><span><i class="fa-solid fa-arrow-right"></i></span></div>
             <div class="f-col grow settings">
@@ -399,7 +402,7 @@
             </div>
             <!-- vertical separation between workspace and right tray -->
             <div id="panel-right" class="f-col j-start settings">
-                <div id="mode-info">
+                <div style="display: none!important;" id="mode-info">
                     <div><label>Device</label><span id="mode-device"></span></div>
                     <div><label>Profile</label><span id="mode-profile"></span></div>
                 </div>
@@ -409,7 +412,7 @@
                         <div id="ws-widgets" class="f-col"></div>
                     </details>
                 </div>
-                <div class="set2-group f-col mode-fdm">
+                <div style="display: none;" class="set2-group f-col mode-fdm">
                     <div class="set-header"><a>ranges</a></div>
                     <div id="fdm-ranges" class="f-col"></div>
                 </div>
@@ -474,19 +477,15 @@
         <!-- help menu -->
         <div id="mod-help" class="mdialog f-col">
             <div class="f-row j-center title">
-                <label>Kiri:Moto Help</label>
+                <label>Welcome to AD-Slicer</label>
             </div>
             <hr width="100%">
             <div class="f-col">
-                <a target="_rsc" href="https://docs.grid.space/projects/kiri-moto"><i class="fas fa-question-circle"></i>Documentation & APIs</a>
-                <a target="_rsc" href="https://forum.grid.space"><i class="fab fa-discourse"></i> Discourse Forums</a>
-                <a target="_rsc" href="https://discord.gg/suyCCgr"><i class="fab fa-discord"></i> Discord Server</a>
-                <a target="_rsc" href="https://github.com/gridspace/grid-apps/issues"><i class="fas fa-bug"></i> Bug Reports</a>
-                <a target="_rsc" href="https://github.com/gridspace/grid-apps/releases"><i class="fab fa-github"></i> Releases & Binaries</a>
-                <a target="_rsc" onclick="kiri.api.modal.show('don8')"><i class="fa-solid fa-sack-dollar"></i> Support Development</a>
-                <a href="https://youtu.be/08795Sj22QE" target="youtube"><i class="fab fa-youtube"></i>Video Guide (from v2.5)</a>
+                <a target="_rsc" href="https://github.com/gridspace/grid-apps/releases"><i class="fab fa-github"></i> Grid Apps Releases & Binaries</a>
+                <a href="https://youtu.be/08795Sj22QE" target="youtube"><i class="fab fa-youtube"></i>Video Guide</a>
             </div>
             <hr width="100%">
+            <div style="justify-content: center;">Powered by Kiri:Moto</div>
             <div class="f-row j-center">
                 <label id="kiri-version"></label>
             </div>
