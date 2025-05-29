@@ -1,8 +1,426 @@
+:root {
+    --main-color: #4d554f;
+    --main-color-hover: #3e463f;
+    --row-hover: rgba(77, 85, 79, 0.15);
+    --work-area: transparent;
+    --header: rgba(77, 85, 79, 0.2);
+    --menu: #eee9d9;
+    --menu-text: #4d554f;
+    --menu-border: #bfb9a6;
+    --dark-menu-text: #fff;
+    --menu-hover: #e0dac7;
+    --blue-00: #2e312f;
+    --blue-0: #3e463f;
+    --blue-1: #4d554f;
+    --blue-2: #6a726c;
+    --blue-3: #bfb9a6;
+    --blue-4: #d8d3c2;
+    --blue-5: #eee9d9;
+    --blue-6: #f7f5ef;
+    /* Those don't look blue, ik. Those are overrides for the original color palette */
+}
+
 #app-name-text {
     position: relative;
 }
+
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.3);
+}
+
 #app-name-text span {
     position: absolute;
     font-size: x-small;
     bottom: -24%;
+}
+
+.set-header {
+    border-radius: 5px;
+    font-size: large;
+    font-weight: bold;
+}
+
+#panel-right>div.grow {
+    align-items: end;
+    justify-content: center;
+    padding-bottom: 2rem;
+}
+
+#slide-show,
+#panel-left>div.f-col.grow.settings,
+#panel-left>div.line-sep2,
+#panel-left>div.chonk {
+    display: none;
+}
+
+#panel-left {
+    padding: 2rem;
+    justify-content: end;
+}
+
+#new-controls {
+    display: grid;
+    justify-content: center;
+    width: 100%;
+    background: color-mix(in srgb, var(--blue-3) 15%, transparent);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    gap: .5rem;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr .25fr 1fr 1fr;
+    transition: grid-template-rows 300ms ease;
+    max-width: 20vw;
+}
+
+#new-controls:has(#material-variant-selector.hidden) {
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 0fr .25fr 1fr 1fr;
+}
+
+/* #new-controls:has(#material-display.hidden):not(:has(#material-variant-selector.hidden)) {
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 0fr 1fr;
+} */
+
+#get-quote-button,
+#browse-materials-link {
+    width: 100%;
+    padding: 1rem 2rem;
+    background-color: var(--blue-1);
+    color: var(--dark-menu-text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: medium;
+    display: flex;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+#get-quote-button:hover {
+    background-color: var(--blue-0);
+}
+
+#new-controls>h3 {
+    text-align: center;
+}
+
+#top>div:nth-child(2)>a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 1rem;
+    font-weight: 600;
+    gap: 0.5rem;
+    transition: all 200ms ease;
+    color: var(--menu-text);
+}
+
+#top>div:nth-child(2)>a:hover {
+    background-color: var(--blue-3);
+    color: var(--blue-00);
+    border-radius: 3px;
+}
+
+.help-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: .3rem;
+    font-weight: 600;
+    transition: all 200ms ease;
+    color: var(--menu-text);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.help-button:hover {
+    background-color: var(--blue-3);
+    color: var(--blue-00);
+    border-radius: 3px;
+}
+
+.form-container {
+    display: flex;
+    gap: 1rem;
+    border-radius: 10px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#new-controls input {
+    width: 3rem;
+    height: 100%;
+}
+
+.input-percent-wrapper {
+    position: relative;
+    display: inline-block;
+    height: 100%;
+}
+
+.input-percent-wrapper::after {
+    content: '%';
+    position: absolute;
+    right: 0.75em;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--main-color, #4d554f);
+    pointer-events: none;
+    font-size: 1em;
+}
+
+.form-container>div {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+#new-controls label {
+    font-weight: 600;
+    color: var(--menu-text);
+    font-size: 18px;
+}
+
+#material-variant-selector {
+    transition: all 300ms ease;
+    overflow: auto;
+}
+
+#material-variant-selector.hidden {
+    overflow: hidden;
+}
+
+#new-controls select {
+    width: 100%;
+}
+
+.form-container select,
+.form-container input {
+    width: 100%;
+    height: 100%;
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: 1px solid var(--menu-border);
+    background-color: var(--menu);
+    color: var(--menu-text);
+    font-size: medium;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    font-weight: 600;
+}
+
+.input-percent-wrapper input {
+    padding: 0 1.5em 0 .5em;
+}
+
+#browse-materials-link {
+    background-color: var(--blue-5);
+    border: 1px solid var(--menu-border);
+    color: var(--main-color);
+}
+
+#material-image-container {
+    aspect-ratio: 1;
+    height: 100%;
+    display: grid;
+    place-items: center;
+}
+
+#material-image-container img {
+    height: 4em;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+#material-info:not(:has(a#browse-materials-link)) {
+    flex-direction: column;
+}
+
+#material-name {
+    margin: 0;
+}
+
+.info-hiding {
+    animation: info-hiding 700ms cubic-bezier(0, 0.69, 0.54, 1.03) both;
+}
+
+.info-revealing {
+    animation: info-showing 700ms cubic-bezier(0, 0.69, 0.54, 1.03) both;
+}
+
+#quality-dialog {
+    width: 60vw;
+}
+
+@keyframes info-hiding {
+    from {
+        clip-path: inset(0 0 0 0);
+    }
+
+    to {
+        clip-path: inset(0 0 100% 0);
+    }
+}
+
+@keyframes info-showing {
+    from {
+        clip-path: inset(100% 0 0 0);
+    }
+
+    to {
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+#material-info {
+    align-items: end;
+}
+
+#material-info a:not(#browse-materials-link),
+#materials-dialog>div>div>p:nth-child(4)>a {
+    color: var(--menu-text);
+    position: relative;
+}
+
+#material-info a:not(#browse-materials-link)::after,
+#materials-dialog>div>div>p:nth-child(4)>a::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--menu-text);
+    transition: scale 0.3s ease;
+    scale: 0 100%;
+}
+
+#material-info a:not(#browse-materials-link):hover::after,
+#materials-dialog>div>div>p:nth-child(4)>a:hover::after {
+    scale: 100% 100%;
+}
+
+.my-dialog {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 15px;
+    background-color: var(--blue-6);
+    animation: swoop-in 200ms ease-out 0s 1 normal forwards;
+}
+
+@keyframes swoop-in {
+    from {
+        transform: translateY(-30%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+}
+
+.my-dialog>div {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    font-size: larger;
+}
+
+.my-dialog nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.my-dialog>div>div {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.my-dialog>div>nav>button {
+    background-color: var(--blue-1);
+    color: var(--dark-menu-text);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+}
+
+.my-dialog>div>nav>button:hover {
+    background-color: var(--blue-0);
+}
+
+.my-dialog>div>nav>h2 {
+    font-size: xx-large;
+}
+
+.my-dialog>div>div>div.quality-option {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.my-dialog>div>div>div.detail-option {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 1rem;
+}
+
+#complex-model-warning-sign {
+    position: absolute;
+    bottom: 40px;
+    right: 10px;
+    padding: 1rem;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background-color: var(--blue-1);
+    color: var(--dark-menu-text);
+    cursor: pointer;
+    max-width: 25%;
+}
+
+#complex-model-warning-text {
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.quote-dialog {
+    display: grid !important;
+    grid-template-rows: 1fr 1fr 1fr;
+    transition: grid-template-rows 300ms ease;
+}
+
+.quote-dialog.done {
+    grid-template-rows: 0fr 1fr 1fr;
+}
+
+#loading-quote {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    overflow: hidden;
+}
+
+#loading-quote>img {
+    border-radius: 50%;
+    aspect-ratio: 1;
+    height: 50px;
+}
+
+#loading-quote>h3 {
+    margin: 0;
+}
+
+#quote-details {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
 }

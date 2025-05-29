@@ -45,6 +45,10 @@ gapp.register("kiri.init", (root, exports) => {
     // copy version from grid app
     kiri.version = gapp.version;
 
+    let complexModel = false;
+
+    const complexModelWarningSign = document.querySelector('#complex-model-warning-sign');
+
     function settings() {
         return api.conf.get();
     }
@@ -61,11 +65,11 @@ gapp.register("kiri.init", (root, exports) => {
                 if (SETUP.debug) {
                     return then();
                 }
-                platform.load_stl("/obj/cube.stl", function(vert) {
+                platform.load_stl("/obj/cube.stl", function (vert) {
                     catalog.putFile("sample cube.stl", vert);
                     platform.update_bounds();
                     space.view.home();
-                    setTimeout(() => { api.space.save(true) },500);
+                    setTimeout(() => { api.space.save(true) }, 500);
                     then();
                     api.help.show();
                 });
@@ -187,7 +191,7 @@ gapp.register("kiri.init", (root, exports) => {
 
     function updateDrawer() {
         const { drawer, scrolls } = settings().controller;
-        $c('app', drawer  ? 'slideshow' : '',   drawer  ? '' : 'slideshow');
+        $c('app', drawer ? 'slideshow' : '', drawer ? '' : 'slideshow');
         $c('app', scrolls ? '' : 'hide-scroll', scrolls ? 'hide-scroll' : '');
     }
 
@@ -201,6 +205,8 @@ gapp.register("kiri.init", (root, exports) => {
             const nrms = space.view.getRMS().toFixed(1);
             const nfps = space.view.getFPS().toFixed(1);
             const rend = space.renderInfo();
+            const triangleCount = rend.render.triangles;
+            complexModel = triangleCount > 1000000; // 1 million triangles is complex
             const { memory, render } = rend;
             if (nfps !== fps.innerText) {
                 fps.innerText = nfps;
@@ -213,6 +219,7 @@ gapp.register("kiri.init", (root, exports) => {
                     return `<div>${row[0]}</div><label>${base.util.comma(row[1])}</label>`
                 }).join('');
             }
+            complexModelWarningSign.style.display = complexModel ? 'grid' : 'none';
         }, 100);
     }
 
@@ -253,10 +260,10 @@ gapp.register("kiri.init", (root, exports) => {
 
     function keyUpHandler(evt) {
         if (api.feature.on_key) {
-            if (api.feature.on_key({up:evt})) return;
+            if (api.feature.on_key({ up: evt })) return;
         }
         for (let handler of api.feature.on_key2) {
-            if (handler({up:evt})) return;
+            if (handler({ up: evt })) return;
         }
         switch (evt.keyCode) {
             // escape
@@ -283,10 +290,10 @@ gapp.register("kiri.init", (root, exports) => {
             return false;
         }
         if (api.feature.on_key) {
-            if (api.feature.on_key({down:evt})) return;
+            if (api.feature.on_key({ down: evt })) return;
         }
         for (let handler of api.feature.on_key2) {
-            if (handler({down:evt})) return;
+            if (handler({ down: evt })) return;
         }
         let move = evt.altKey ? 5 : 0,
             deg = move ? 0 : -Math.PI / (evt.shiftKey ? 36 : 2);
@@ -311,14 +318,14 @@ gapp.register("kiri.init", (root, exports) => {
                 break;
             case 38: // up arrow
                 if (inputHasFocus()) return false;
-                if (evt.metaKey) return api.show.layer(api.var.layer_at+1);
+                if (evt.metaKey) return api.show.layer(api.var.layer_at + 1);
                 if (deg) selection.rotate(deg, 0, 0);
                 if (move > 0) selection.move(0, move, 0);
                 evt.preventDefault();
                 break;
             case 40: // down arrow
                 if (inputHasFocus()) return false;
-                if (evt.metaKey) return api.show.layer(api.var.layer_at-1);
+                if (evt.metaKey) return api.show.layer(api.var.layer_at - 1);
                 if (deg) selection.rotate(-deg, 0, 0);
                 if (move > 0) selection.move(0, -move, 0);
                 evt.preventDefault();
@@ -337,11 +344,11 @@ gapp.register("kiri.init", (root, exports) => {
                     api.conf.save();
                     console.log("settings saved");
                 } else
-                if (evt.metaKey) {
-                    evt.preventDefault();
-                    api.space.save();
-                    api.settings.sync.put();
-                }
+                    if (evt.metaKey) {
+                        evt.preventDefault();
+                        api.space.save();
+                        api.settings.sync.put();
+                    }
                 break;
             case 76: // 'l' for restore workspace
                 if (evt.metaKey) {
@@ -358,10 +365,10 @@ gapp.register("kiri.init", (root, exports) => {
             return false;
         }
         if (api.feature.on_key) {
-            if (api.feature.on_key({key:evt})) return;
+            if (api.feature.on_key({ key: evt })) return;
         }
         for (let handler of api.feature.on_key2) {
-            if (handler({key:evt})) return;
+            if (handler({ key: evt })) return;
         }
         if (evt.ctrlKey) {
             switch (evt.key) {
@@ -372,15 +379,15 @@ gapp.register("kiri.init", (root, exports) => {
         switch (evt.charCode) {
             case cca('`'): api.show.slices(0); break;
             case cca('0'): api.show.slices(api.var.layer_max); break;
-            case cca('1'): api.show.slices(api.var.layer_max/10); break;
-            case cca('2'): api.show.slices(api.var.layer_max*2/10); break;
-            case cca('3'): api.show.slices(api.var.layer_max*3/10); break;
-            case cca('4'): api.show.slices(api.var.layer_max*4/10); break;
-            case cca('5'): api.show.slices(api.var.layer_max*5/10); break;
-            case cca('6'): api.show.slices(api.var.layer_max*6/10); break;
-            case cca('7'): api.show.slices(api.var.layer_max*7/10); break;
-            case cca('8'): api.show.slices(api.var.layer_max*8/10); break;
-            case cca('9'): api.show.slices(api.var.layer_max*9/10); break;
+            case cca('1'): api.show.slices(api.var.layer_max / 10); break;
+            case cca('2'): api.show.slices(api.var.layer_max * 2 / 10); break;
+            case cca('3'): api.show.slices(api.var.layer_max * 3 / 10); break;
+            case cca('4'): api.show.slices(api.var.layer_max * 4 / 10); break;
+            case cca('5'): api.show.slices(api.var.layer_max * 5 / 10); break;
+            case cca('6'): api.show.slices(api.var.layer_max * 6 / 10); break;
+            case cca('7'): api.show.slices(api.var.layer_max * 7 / 10); break;
+            case cca('8'): api.show.slices(api.var.layer_max * 8 / 10); break;
+            case cca('9'): api.show.slices(api.var.layer_max * 9 / 10); break;
             case cca('?'):
                 api.help.show();
                 break;
@@ -493,8 +500,8 @@ gapp.register("kiri.init", (root, exports) => {
     }
 
     function clearSelected(children) {
-        for (let i=0; i<children.length; i++) {
-            children[i].setAttribute('class','');
+        for (let i = 0; i < children.length; i++) {
+            children[i].setAttribute('class', '');
         }
     }
 
@@ -503,7 +510,7 @@ gapp.register("kiri.init", (root, exports) => {
             api.show.alert("select object to rotate");
             return;
         }
-        api.uc.prompt("Enter X,Y,Z degrees of rotation","").then(coord => {
+        api.uc.prompt("Enter X,Y,Z degrees of rotation", "").then(coord => {
             coord = (coord || '').split(',');
             let prod = Math.PI / 180,
                 x = parseFloat(coord[0] || 0.0) * prod,
@@ -519,19 +526,19 @@ gapp.register("kiri.init", (root, exports) => {
             return;
         }
         let current = settings(),
-            { device, process} = current,
+            { device, process } = current,
             center = process.ctOriginCenter || process.camOriginCenter || device.bedRound || device.originCenter,
             bounds = boundsSelection();
 
-        api.uc.prompt("Enter X,Y coordinates for selection","").then(coord => {
+        api.uc.prompt("Enter X,Y coordinates for selection", "").then(coord => {
             coord = (coord || '').split(',');
             let x = parseFloat(coord[0] || 0.0),
                 y = parseFloat(coord[1] || 0.0),
                 z = parseFloat(coord[2] || 0.0);
 
             if (!center) {
-                x = x - device.bedWidth/2 + (bounds.max.x - bounds.min.x)/2;
-                y = y - device.bedDepth/2 + (bounds.max.y - bounds.min.y)/2
+                x = x - device.bedWidth / 2 + (bounds.max.x - bounds.min.x) / 2;
+                y = y - device.bedDepth / 2 + (bounds.max.y - bounds.min.y) / 2
             }
 
             selection.move(x, y, z, true);
@@ -541,8 +548,8 @@ gapp.register("kiri.init", (root, exports) => {
     function deviceExport(exp, name) {
         name = (name || "device")
             .toLowerCase()
-            .replace(/ /g,'_')
-            .replace(/\./g,'_');
+            .replace(/ /g, '_')
+            .replace(/\./g, '_');
         uc.prompt("Export Device Filename", name).then(name => {
             if (name) {
                 api.util.download(exp, `${name}.km`);
@@ -552,7 +559,7 @@ gapp.register("kiri.init", (root, exports) => {
 
     function objectsExport(format = "stl") {
         // return selection.export();
-        uc.confirm("Export Filename", {ok:true, cancel: false}, `selected.${format}`).then(name => {
+        uc.confirm("Export Filename", { ok: true, cancel: false }, `selected.${format}`).then(name => {
             if (!name) return;
             if (name.toLowerCase().indexOf(`.${format}`) < 0) {
                 name = `${name}.${format}`;
@@ -562,7 +569,7 @@ gapp.register("kiri.init", (root, exports) => {
     }
 
     function workspaceNew() {
-        uc.confirm("Clear Workspace?", {ok:true, cancel: false}).then(value => {
+        uc.confirm("Clear Workspace?", { ok: true, cancel: false }).then(value => {
             if (value === true) {
                 let proc = api.settings.proc();
                 proc.ops && (proc.ops.length = 0);
@@ -573,29 +580,31 @@ gapp.register("kiri.init", (root, exports) => {
     }
 
     function profileExport() {
-        const opt = {pre: [
-            "<div class='f-col a-center gap5 mlr10'>",
-            "  <h3>Workspace Export</h3>",
-            "  <label>This will create a backup of your</label>",
-            "  <label>workspace, devices, and settings</label>",
-            "  <span class='mt10'><input id='excwork' type='checkbox'>&nbsp;Exclude meshes</span>",
-            "</div>"
-        ]};
+        const opt = {
+            pre: [
+                "<div class='f-col a-center gap5 mlr10'>",
+                "  <h3>Workspace Export</h3>",
+                "  <label>This will create a backup of your</label>",
+                "  <label>workspace, devices, and settings</label>",
+                "  <span class='mt10'><input id='excwork' type='checkbox'>&nbsp;Exclude meshes</span>",
+                "</div>"
+            ]
+        };
         let suggestion = "workspace";
         let file = api.widgets.all()[0]?.meta.file || '';
         if (file) {
-            suggestion = `${suggestion}_${file.split('.')[0]}`.replaceAll(' ','_');
+            suggestion = `${suggestion}_${file.split('.')[0]}`.replaceAll(' ', '_');
         };
-        uc.confirm("Filename", {ok:true, cancel: false}, suggestion, opt).then(name => {
+        uc.confirm("Filename", { ok: true, cancel: false }, suggestion, opt).then(name => {
             if (!name) return;
 
             let work = !$('excwork').checked;
-            let json = api.conf.export({work, clear:true});
+            let json = api.conf.export({ work, clear: true });
 
             kiri.client.zip([
-                {name:"workspace.json", data:JSON.stringify(json)}
+                { name: "workspace.json", data: JSON.stringify(json) }
             ], progress => {
-                api.show.progress(progress.percent/100, "compressing workspace");
+                api.show.progress(progress.percent / 100, "compressing workspace");
             }, output => {
                 api.show.progress(0);
                 api.util.download(output, `${name}.kmz`);
@@ -704,7 +713,7 @@ gapp.register("kiri.init", (root, exports) => {
     }
 
     function loadCatalogFile(e) {
-        api.widgets.load(e.target.getAttribute('load'), function(widget) {
+        api.widgets.load(e.target.getAttribute('load'), function (widget) {
             platform.add(widget);
             api.dialog.hide();
         });
@@ -715,12 +724,12 @@ gapp.register("kiri.init", (root, exports) => {
             list = [];
         table.innerHTML = '';
         for (let name in files) {
-            list.push({n:name, ln:name.toLowerCase(), v:files[name].vertices, t:files[name].updated});
+            list.push({ n: name, ln: name.toLowerCase(), v: files[name].vertices, t: files[name].updated });
         }
-        list.sort(function(a,b) {
+        list.sort(function (a, b) {
             return a.ln < b.ln ? -1 : 1;
         });
-        for (let i=0; i<list.length; i++) {
+        for (let i = 0; i < list.length; i++) {
             let row = DOC.createElement('div'),
                 renm = DOC.createElement('button'),
                 load = DOC.createElement('button'),
@@ -752,7 +761,7 @@ gapp.register("kiri.init", (root, exports) => {
             load.appendChild(DOC.createTextNode(short));
 
             del.setAttribute('del', name);
-            del.setAttribute('title', "remove '"+name+"'");
+            del.setAttribute('title', "remove '" + name + "'");
             del.onclick = () => { catalog.deleteFile(name) };
             del.innerHTML = '<i class="far fa-trash-alt"></i>';
 
@@ -848,519 +857,519 @@ gapp.register("kiri.init", (root, exports) => {
         let anim = ui.anim = {};
 
         Object.assign(ui, {
-            tracker:            tracker,
-            container:          container,
+            tracker: tracker,
+            container: container,
 
             alert: {
-                dialog:         $('alert-area'),
-                text:           $('alert-text')
+                dialog: $('alert-area'),
+                text: $('alert-text')
             },
             func: {
-                slice:          $('act-slice'),
-                preview:        $('act-preview'),
-                animate:        $('act-animate'),
-                export:         $('act-export')
+                slice: $('act-slice'),
+                preview: $('act-preview'),
+                animate: $('act-animate'),
+                export: $('act-export')
             },
             label: {
-                slice:          $('label-slice'),
-                preview:        $('label-preview'),
-                animate:        $('label-animate'),
-                export:         $('label-export'),
+                slice: $('label-slice'),
+                preview: $('label-preview'),
+                animate: $('label-animate'),
+                export: $('label-export'),
             },
             acct: {
-                help:           $('app-help'),
-                don8:           $('app-don8'),
-                mesh:           $('app-mesh'),
-                export:         $('app-export')
+                help: $('app-help'),
+                don8: $('app-don8'),
+                mesh: $('app-mesh'),
+                export: $('app-export')
             },
             dev: {
-                header:         $('dev-header'),
-                search:         $('dev-search'),
-                filter:         $('dev-filter')
+                header: $('dev-header'),
+                search: $('dev-search'),
+                filter: $('dev-filter')
             },
             mesh: {
-                name:           $('mesh-name'),
-                points:         $('mesh-points'),
-                faces:          $('mesh-faces'),
+                name: $('mesh-name'),
+                points: $('mesh-points'),
+                faces: $('mesh-faces'),
             },
 
             stats: {
-                fps:            $('fps'),
-                rms:            $('rms'),
-                div:            $('stats'),
-                rnfo:           $('rnfo'),
+                fps: $('fps'),
+                rms: $('rms'),
+                div: $('stats'),
+                rnfo: $('rnfo'),
             },
 
-            load:               $('load-file'),
-            speeds:             $('speeds'),
-            speedbar:           $('speedbar'),
-            context:            $('context-menu'),
+            load: $('load-file'),
+            speeds: $('speeds'),
+            speedbar: $('speedbar'),
+            context: $('context-menu'),
 
-            ltsetup:            $('lt-setup'),
-            ltfile:             $('lt-file'),
-            ltview:             $('lt-view'),
-            ltact:              $('lt-start'),
-            edit:               $('lt-tools'),
-            nozzle:             $('menu-nozzle'),
+            ltsetup: $('lt-setup'),
+            ltfile: $('lt-file'),
+            ltview: $('lt-view'),
+            ltact: $('lt-start'),
+            edit: $('lt-tools'),
+            nozzle: $('menu-nozzle'),
 
-            modal:              $('modal'),
-            modalBox:           $('modal-box'),
+            modal: $('modal'),
+            modalBox: $('modal-box'),
             modals: {
-                help:               $('mod-help'),
-                setup:              $('mod-setup'),
-                prefs:              $('mod-prefs'),
-                files:              $('mod-files'),
-                saves:              $('mod-saves'),
-                tools:              $('mod-tools'),
-                xany:               $('mod-x-any'),
-                xsla:               $('mod-x-sla'),
-                xlaser:             $('mod-x-laser'),
-                local:              $('mod-local'),
-                don8:               $('mod-don8'),
-                any:                $('mod-any'),
+                help: $('mod-help'),
+                setup: $('mod-setup'),
+                prefs: $('mod-prefs'),
+                files: $('mod-files'),
+                saves: $('mod-saves'),
+                tools: $('mod-tools'),
+                xany: $('mod-x-any'),
+                xsla: $('mod-x-sla'),
+                xlaser: $('mod-x-laser'),
+                local: $('mod-local'),
+                don8: $('mod-don8'),
+                any: $('mod-any'),
             },
 
-            catalogBody:        $('catalogBody'),
-            catalogList:        $('catalogList'),
+            catalogBody: $('catalogBody'),
+            catalogList: $('catalogList'),
 
-            devices:            $('devices'),
-            deviceAdd:          $('device-add'),
-            deviceDelete:       $('device-del'),
-            deviceRename:       $('device-ren'),
-            deviceExport:       $('device-exp'),
-            deviceSave:         $('device-save'),
+            devices: $('devices'),
+            deviceAdd: $('device-add'),
+            deviceDelete: $('device-del'),
+            deviceRename: $('device-ren'),
+            deviceExport: $('device-exp'),
+            deviceSave: $('device-save'),
 
-            toolsSave:          $('tools-save'),
-            toolsClose:         $('tools-close'),
-            toolsImport:        $('tools-import'),
-            toolsExport:        $('tools-export'),
-            toolSelect:         $('tool-select'),
-            toolAdd:            $('tool-add'),
-            toolCopy:           $('tool-dup'),
-            toolDelete:         $('tool-del'),
-            toolType:           $('tool-type'),
-            toolName:           $('tool-name'),
-            toolNum:            $('tool-num'),
-            toolFluteDiam:      $('tool-fdiam'),
-            toolFluteLen:       $('tool-flen'),
-            toolShaftDiam:      $('tool-sdiam'),
-            toolShaftLen:       $('tool-slen'),
-            toolTaperAngle:     $('tool-tangle'),
-            toolTaperTip:       $('tool-ttip'),
-            toolMetric:         $('tool-metric'),
+            toolsSave: $('tools-save'),
+            toolsClose: $('tools-close'),
+            toolsImport: $('tools-import'),
+            toolsExport: $('tools-export'),
+            toolSelect: $('tool-select'),
+            toolAdd: $('tool-add'),
+            toolCopy: $('tool-dup'),
+            toolDelete: $('tool-del'),
+            toolType: $('tool-type'),
+            toolName: $('tool-name'),
+            toolNum: $('tool-num'),
+            toolFluteDiam: $('tool-fdiam'),
+            toolFluteLen: $('tool-flen'),
+            toolShaftDiam: $('tool-sdiam'),
+            toolShaftLen: $('tool-slen'),
+            toolTaperAngle: $('tool-tangle'),
+            toolTaperTip: $('tool-ttip'),
+            toolMetric: $('tool-metric'),
 
-            setMenu:            $('set-menu'),
-            settings:           $('settings'),
-            settingsBody:       $('settingsBody'),
-            settingsList:       $('settingsList'),
+            setMenu: $('set-menu'),
+            settings: $('settings'),
+            settingsBody: $('settingsBody'),
+            settingsList: $('settingsList'),
 
-            slider:             $('slider'),
-            sliderMax:          $('slider-max'),
-            sliderMin:          $('slider-zero'),
-            sliderLo:           $('slider-lo'),
-            sliderMid:          $('slider-mid'),
-            sliderHi:           $('slider-hi'),
-            sliderHold:         $('slider-hold'),
-            sliderRange:        $('slider-center'),
+            slider: $('slider'),
+            sliderMax: $('slider-max'),
+            sliderMin: $('slider-zero'),
+            sliderLo: $('slider-lo'),
+            sliderMid: $('slider-mid'),
+            sliderHi: $('slider-hi'),
+            sliderHold: $('slider-hold'),
+            sliderRange: $('slider-center'),
 
-            loading:            $('progress').style,
-            progress:           $('progbar').style,
-            prostatus:          $('progtxt'),
+            loading: $('progress').style,
+            progress: $('progbar').style,
+            prostatus: $('progtxt'),
 
-            selection:          $('selection'),
-            sizeX:              $('size_x'),
-            sizeY:              $('size_y'),
-            sizeZ:              $('size_z'),
-            scaleX:             $('scale_x'),
-            scaleY:             $('scale_y'),
-            scaleZ:             $('scale_z'),
-            lockX:              $('lock_x'),
-            lockY:              $('lock_y'),
-            lockZ:              $('lock_z'),
-            stock:              $('stock'),
-            stockWidth:         $('stock-width'),
-            stockDepth:         $('stock-width'),
-            stockHeight:        $('stock-width'),
+            selection: $('selection'),
+            sizeX: $('size_x'),
+            sizeY: $('size_y'),
+            sizeZ: $('size_z'),
+            scaleX: $('scale_x'),
+            scaleY: $('scale_y'),
+            scaleZ: $('scale_z'),
+            lockX: $('lock_x'),
+            lockY: $('lock_y'),
+            lockZ: $('lock_z'),
+            stock: $('stock'),
+            stockWidth: $('stock-width'),
+            stockDepth: $('stock-width'),
+            stockHeight: $('stock-width'),
 
             /** CAM Animation Bar */
 
             _____: {
-                _____: newDiv({ addto: $('layer-animate'), set:true }),
+                _____: newDiv({ addto: $('layer-animate'), set: true }),
                 row: newRow([
-                    anim.replay   = newButton(null,"anim.replay",{icon:'<i class="fas fa-fast-backward"></i>',title:"restart"}),
-                    anim.play     = newButton(null,"anim.play",{icon:'<i class="fas fa-play"></i>',title:"play"}),
-                    anim.pause    = newButton(null,"anim.pause",{icon:'<i class="fas fa-pause"></i>',title:"pause"}),
-                    anim.step     = newButton(null,"anim.step",{icon:'<i class="fas fa-step-forward"></i>',title:"single step"}),
-                    anim.speed    = newButton(null,"anim.fast",{icon:'<i class="fas fa-forward"></i>',title:"toggle speed"}),
-                    anim.labspd   = newValue(3, {class:"center padleft"}),
-                    anim.labx     = newLabel("X", {class:"padleft"}),
-                    anim.valx     = newValue(7, {class:"center"}),
-                    anim.laby     = newLabel("Y", {class:"padleft"}),
-                    anim.valy     = newValue(7, {class:"center"}),
-                    anim.labz     = newLabel("Z", {class:"padleft"}),
-                    anim.valz     = newValue(6, {class:"center"}),
-                    anim.laba     = newLabel("A", {class:"padleft hide"}),
-                    anim.vala     = newValue(6, {class:"center hide"}),
-                    anim.labpro   = newLabel("%", {class:"padleft"}),
-                    anim.progress = newValue(5, {class:"center"}),
-                    anim.trans    = newButton(null,"anim.trans",{icon:'<i class="fa-solid fa-border-none"></i>',title:"transparency",class:"padleft"}),
-                    anim.model    = newButton(null,"anim.model",{icon:'<i class="fa-solid fa-eye"></i>',title:"show model"}),
-                    anim.shade    = newButton(null,"anim.stock",{icon:'<i class="fa-solid fa-cube"></i>',title:"stock box"}),
+                    anim.replay = newButton(null, "anim.replay", { icon: '<i class="fas fa-fast-backward"></i>', title: "restart" }),
+                    anim.play = newButton(null, "anim.play", { icon: '<i class="fas fa-play"></i>', title: "play" }),
+                    anim.pause = newButton(null, "anim.pause", { icon: '<i class="fas fa-pause"></i>', title: "pause" }),
+                    anim.step = newButton(null, "anim.step", { icon: '<i class="fas fa-step-forward"></i>', title: "single step" }),
+                    anim.speed = newButton(null, "anim.fast", { icon: '<i class="fas fa-forward"></i>', title: "toggle speed" }),
+                    anim.labspd = newValue(3, { class: "center padleft" }),
+                    anim.labx = newLabel("X", { class: "padleft" }),
+                    anim.valx = newValue(7, { class: "center" }),
+                    anim.laby = newLabel("Y", { class: "padleft" }),
+                    anim.valy = newValue(7, { class: "center" }),
+                    anim.labz = newLabel("Z", { class: "padleft" }),
+                    anim.valz = newValue(6, { class: "center" }),
+                    anim.laba = newLabel("A", { class: "padleft hide" }),
+                    anim.vala = newValue(6, { class: "center hide" }),
+                    anim.labpro = newLabel("%", { class: "padleft" }),
+                    anim.progress = newValue(5, { class: "center" }),
+                    anim.trans = newButton(null, "anim.trans", { icon: '<i class="fa-solid fa-border-none"></i>', title: "transparency", class: "padleft" }),
+                    anim.model = newButton(null, "anim.model", { icon: '<i class="fa-solid fa-eye"></i>', title: "show model" }),
+                    anim.shade = newButton(null, "anim.stock", { icon: '<i class="fa-solid fa-cube"></i>', title: "stock box" }),
                 ])
             },
 
             /** Device Browser / Editor */
 
-            _____:            newDiv({ class: "f-col t-body t-inset", addto: $('dev-config'), set:true }),
-            device:           newGroup(LANG.dv_gr_dev, null, {group:"ddev", inline, class:"noshow"}),
+            _____: newDiv({ class: "f-col t-body t-inset", addto: $('dev-config'), set: true }),
+            device: newGroup(LANG.dv_gr_dev, null, { group: "ddev", inline, class: "noshow" }),
 
-            _____:            newGroup("workspace", null, {group:"dext", inline}),
-            bedWidth:         newInput('X (width)', {title:LANG.dv_bedw_l, convert:toFloat, size:6, units, round:2, action:updateDeviceSize}),
-            bedDepth:         newInput('Y (depth)', {title:LANG.dv_bedw_l, convert:toFloat, size:6, units, round:2, action:updateDeviceSize}),
-            maxHeight:        newInput('Z (height)', {title:LANG.dv_bedw_l, convert:toFloat, size:6, units, round:2, action:updateDeviceSize}),
-            resolutionX:      newInput(LANG.dv_rezx_s, {title:LANG.dv_rezx_l, convert:toInt, size:6, modes:SLA}),
-            resolutionY:      newInput(LANG.dv_rezy_s, {title:LANG.dv_rezy_l, convert:toInt, size:6, modes:SLA}),
-            _____:            newDiv({ class: "f-col t-body t-inset", addto: $('dev-config'), set:true, modes:NO_WEDM }),
-            _____:            newGroup("firmware", null, {group:"dext", inline, modes:NO_WEDM}),
-            fwRetract:        newBoolean(LANG.dv_retr_s, onBooleanClick, {title:LANG.dv_retr_l, modes:FDM}),
-            deviceOrigin:     newBoolean(LANG.dv_orgc_s, onBooleanClick, {title:LANG.dv_orgc_l, modes:FDM_LZN, show:() => !ui.deviceRound.checked}),
-            deviceRound:      newBoolean(LANG.dv_bedc_s, onBooleanClick, {title:LANG.dv_bedc_l, modes:FDM, trigger, show:isNotBelt}),
-            deviceBelt:       newBoolean(LANG.dv_belt_s, onBooleanClick, {title:LANG.dv_belt_l, modes:FDM, trigger, show:() => !ui.deviceRound.checked}),
-            separator:        newBlank({class:"pop-sep", modes:FDM, driven}),
-            spindleMax:       newInput(LANG.dv_spmx_s, {title:LANG.dv_spmx_l, convert:toInt, size:5, modes:CAM, trigger}),
-            deviceZMax:       newInput(LANG.dv_zmax_s, {title:LANG.dv_zmax_l, convert:toInt, size:5, modes:FDM}),
-            gcodeTime:        newInput(LANG.dv_time_s, {title:LANG.dv_time_l, convert:toFloat, size:5, modes:FDM}),
-            _____:            newDiv({ class: "f-col t-body t-inset", addto: $('dev-config'), set:true, modes:FDM }),
-            extruder:         newGroup(LANG.dv_gr_ext, null, {group:"dext", inline}),
-            extFilament:      newInput(LANG.dv_fila_s, {title:LANG.dv_fila_l, convert:toFloat, modes:FDM}),
-            extNozzle:        newInput(LANG.dv_nozl_s, {title:LANG.dv_nozl_l, convert:toFloat, modes:FDM}),
-            extOffsetX:       newInput(LANG.dv_exox_s, {title:LANG.dv_exox_l, convert:toFloat, modes:FDM}),
-            extOffsetY:       newInput(LANG.dv_exoy_s, {title:LANG.dv_exoy_l, convert:toFloat, modes:FDM}),
-            extPad:           newBlank({class:"grow", modes:FDM}),
-            separator:        newBlank({class:"pop-sep", modes:FDM, driven}),
-            extActions:       newRow([
-                ui.extPrev = newButton(undefined, undefined, {icon:'<i class="fas fa-less-than"></i>'}),
-                ui.extAdd  = newButton(undefined, undefined, {icon:'<i class="fas fa-plus"></i>'}),
-                ui.extDel  = newButton(undefined, undefined, {icon:'<i class="fas fa-minus"></i>'}),
-                ui.extNext = newButton(undefined, undefined, {icon:'<i class="fas fa-greater-than"></i>'})
-            ], {class:"dev-buttons ext-buttons var-row", modes:FDM}),
-            _____:            newDiv({ class: "f-col t-body t-inset", addto: $('dev-config'), set:true, modes:CAM_LZR }),
-            _____:            newGroup(LANG.dv_gr_out, null, {group:"dgco", inline}),
-            gcodeStrip:       newBoolean(LANG.dv_strc_s, onBooleanClick, {title:LANG.dv_strc_l, modes:CAM}),
-            gcodeSpace:       newBoolean(LANG.dv_tksp_s, onBooleanClick, {title:LANG.dv_tksp_l, modes:CAM_LZR}),
-            laserMaxPower:    newInput(LANG.ou_maxp_s, {title:LANG.ou_maxp_l, modes:LASER, size:7, text:true}),
-            useLaser:         newBoolean(LANG.dv_lazr_s, onBooleanClick, {title:LANG.dv_lazr_l, modes:CAM}),
-            gcodeFExt:        newInput(LANG.dv_fext_s, {title:LANG.dv_fext_l, modes:CAM_LZR, size:7, text:true}),
-            gcodeEd:          newGroup(LANG.dv_gr_gco, $('dg'), {group:"dgcp", inline, modes:GCODE}),
-            gcodeMacros:      newRow([
-                (ui.gcodePre      = newGCode(LANG.dv_head_s, {title:LANG.dv_head_l, modes:GCODE, area:gcode})).button,
-                (ui.gcodePost     = newGCode(LANG.dv_foot_s, {title:LANG.dv_foot_l, modes:GCODE, area:gcode})).button,
-                (ui.gcodeLayer    = newGCode(LANG.dv_layr_s, {title:LANG.dv_layr_l, modes:FDM,   area:gcode})).button,
-                (ui.gcodeTrack    = newGCode(LANG.dv_prog_s, {title:LANG.dv_prog_l, modes:FDM,   area:gcode})).button,
-                (ui.gcodeFan      = newGCode(LANG.dv_fanp_s, {title:LANG.dv_fanp_l, modes:FDM,   area:gcode})).button,
-                (ui.gcodeFeature  = newGCode(LANG.dv_feat_s, {title:LANG.dv_feat_l, modes:FDM,   area:gcode})).button,
-                (ui.gcodeLaserOn  = newGCode(LANG.dv_lzon_s, {title:LANG.dv_lzon_l, modes:LASER, area:gcode})).button,
-                (ui.gcodeLaserOff = newGCode(LANG.dv_lzof_s, {title:LANG.dv_lzof_l, modes:LASER, area:gcode})).button,
-                (ui.gcodeWaterOn  = newGCode(LANG.dv_waon_s, {title:LANG.dv_waon_l, modes:WJET,  area:gcode})).button,
-                (ui.gcodeWaterOff = newGCode(LANG.dv_waof_s, {title:LANG.dv_waof_l, modes:WJET,  area:gcode})).button,
-                (ui.gcodeKnifeDn  = newGCode(LANG.dv_dkon_s, {title:LANG.dv_dkon_l, modes:DRAG,  area:gcode})).button,
-                (ui.gcodeKnifeUp  = newGCode(LANG.dv_dkof_s, {title:LANG.dv_dkof_l, modes:DRAG,  area:gcode})).button,
-                (ui.gcodeChange   = newGCode(LANG.dv_tool_s, {title:LANG.dv_tool_l, modes:FDM_CAM,   area:gcode})).button,
-                (ui.gcodeDwell    = newGCode(LANG.dv_dwll_s, {title:LANG.dv_dwll_l, modes:CAM,   area:gcode})).button,
-                (ui.gcodeSpindle  = newGCode(LANG.dv_sspd_s, {title:LANG.dv_sspd_l, modes:CAM,   area:gcode, show:() => ui.spindleMax.value > 0})).button
-            ], {class:"ext-buttons f-row gcode-macros"}),
+            _____: newGroup("workspace", null, { group: "dext", inline }),
+            bedWidth: newInput('X (width)', { title: LANG.dv_bedw_l, convert: toFloat, size: 6, units, round: 2, action: updateDeviceSize }),
+            bedDepth: newInput('Y (depth)', { title: LANG.dv_bedw_l, convert: toFloat, size: 6, units, round: 2, action: updateDeviceSize }),
+            maxHeight: newInput('Z (height)', { title: LANG.dv_bedw_l, convert: toFloat, size: 6, units, round: 2, action: updateDeviceSize }),
+            resolutionX: newInput(LANG.dv_rezx_s, { title: LANG.dv_rezx_l, convert: toInt, size: 6, modes: SLA }),
+            resolutionY: newInput(LANG.dv_rezy_s, { title: LANG.dv_rezy_l, convert: toInt, size: 6, modes: SLA }),
+            _____: newDiv({ class: "f-col t-body t-inset", addto: $('dev-config'), set: true, modes: NO_WEDM }),
+            _____: newGroup("firmware", null, { group: "dext", inline, modes: NO_WEDM }),
+            fwRetract: newBoolean(LANG.dv_retr_s, onBooleanClick, { title: LANG.dv_retr_l, modes: FDM }),
+            deviceOrigin: newBoolean(LANG.dv_orgc_s, onBooleanClick, { title: LANG.dv_orgc_l, modes: FDM_LZN, show: () => !ui.deviceRound.checked }),
+            deviceRound: newBoolean(LANG.dv_bedc_s, onBooleanClick, { title: LANG.dv_bedc_l, modes: FDM, trigger, show: isNotBelt }),
+            deviceBelt: newBoolean(LANG.dv_belt_s, onBooleanClick, { title: LANG.dv_belt_l, modes: FDM, trigger, show: () => !ui.deviceRound.checked }),
+            separator: newBlank({ class: "pop-sep", modes: FDM, driven }),
+            spindleMax: newInput(LANG.dv_spmx_s, { title: LANG.dv_spmx_l, convert: toInt, size: 5, modes: CAM, trigger }),
+            deviceZMax: newInput(LANG.dv_zmax_s, { title: LANG.dv_zmax_l, convert: toInt, size: 5, modes: FDM }),
+            gcodeTime: newInput(LANG.dv_time_s, { title: LANG.dv_time_l, convert: toFloat, size: 5, modes: FDM }),
+            _____: newDiv({ class: "f-col t-body t-inset", addto: $('dev-config'), set: true, modes: FDM }),
+            extruder: newGroup(LANG.dv_gr_ext, null, { group: "dext", inline }),
+            extFilament: newInput(LANG.dv_fila_s, { title: LANG.dv_fila_l, convert: toFloat, modes: FDM }),
+            extNozzle: newInput(LANG.dv_nozl_s, { title: LANG.dv_nozl_l, convert: toFloat, modes: FDM }),
+            extOffsetX: newInput(LANG.dv_exox_s, { title: LANG.dv_exox_l, convert: toFloat, modes: FDM }),
+            extOffsetY: newInput(LANG.dv_exoy_s, { title: LANG.dv_exoy_l, convert: toFloat, modes: FDM }),
+            extPad: newBlank({ class: "grow", modes: FDM }),
+            separator: newBlank({ class: "pop-sep", modes: FDM, driven }),
+            extActions: newRow([
+                ui.extPrev = newButton(undefined, undefined, { icon: '<i class="fas fa-less-than"></i>' }),
+                ui.extAdd = newButton(undefined, undefined, { icon: '<i class="fas fa-plus"></i>' }),
+                ui.extDel = newButton(undefined, undefined, { icon: '<i class="fas fa-minus"></i>' }),
+                ui.extNext = newButton(undefined, undefined, { icon: '<i class="fas fa-greater-than"></i>' })
+            ], { class: "dev-buttons ext-buttons var-row", modes: FDM }),
+            _____: newDiv({ class: "f-col t-body t-inset", addto: $('dev-config'), set: true, modes: CAM_LZR }),
+            _____: newGroup(LANG.dv_gr_out, null, { group: "dgco", inline }),
+            gcodeStrip: newBoolean(LANG.dv_strc_s, onBooleanClick, { title: LANG.dv_strc_l, modes: CAM }),
+            gcodeSpace: newBoolean(LANG.dv_tksp_s, onBooleanClick, { title: LANG.dv_tksp_l, modes: CAM_LZR }),
+            laserMaxPower: newInput(LANG.ou_maxp_s, { title: LANG.ou_maxp_l, modes: LASER, size: 7, text: true }),
+            useLaser: newBoolean(LANG.dv_lazr_s, onBooleanClick, { title: LANG.dv_lazr_l, modes: CAM }),
+            gcodeFExt: newInput(LANG.dv_fext_s, { title: LANG.dv_fext_l, modes: CAM_LZR, size: 7, text: true }),
+            gcodeEd: newGroup(LANG.dv_gr_gco, $('dg'), { group: "dgcp", inline, modes: GCODE }),
+            gcodeMacros: newRow([
+                (ui.gcodePre = newGCode(LANG.dv_head_s, { title: LANG.dv_head_l, modes: GCODE, area: gcode })).button,
+                (ui.gcodePost = newGCode(LANG.dv_foot_s, { title: LANG.dv_foot_l, modes: GCODE, area: gcode })).button,
+                (ui.gcodeLayer = newGCode(LANG.dv_layr_s, { title: LANG.dv_layr_l, modes: FDM, area: gcode })).button,
+                (ui.gcodeTrack = newGCode(LANG.dv_prog_s, { title: LANG.dv_prog_l, modes: FDM, area: gcode })).button,
+                (ui.gcodeFan = newGCode(LANG.dv_fanp_s, { title: LANG.dv_fanp_l, modes: FDM, area: gcode })).button,
+                (ui.gcodeFeature = newGCode(LANG.dv_feat_s, { title: LANG.dv_feat_l, modes: FDM, area: gcode })).button,
+                (ui.gcodeLaserOn = newGCode(LANG.dv_lzon_s, { title: LANG.dv_lzon_l, modes: LASER, area: gcode })).button,
+                (ui.gcodeLaserOff = newGCode(LANG.dv_lzof_s, { title: LANG.dv_lzof_l, modes: LASER, area: gcode })).button,
+                (ui.gcodeWaterOn = newGCode(LANG.dv_waon_s, { title: LANG.dv_waon_l, modes: WJET, area: gcode })).button,
+                (ui.gcodeWaterOff = newGCode(LANG.dv_waof_s, { title: LANG.dv_waof_l, modes: WJET, area: gcode })).button,
+                (ui.gcodeKnifeDn = newGCode(LANG.dv_dkon_s, { title: LANG.dv_dkon_l, modes: DRAG, area: gcode })).button,
+                (ui.gcodeKnifeUp = newGCode(LANG.dv_dkof_s, { title: LANG.dv_dkof_l, modes: DRAG, area: gcode })).button,
+                (ui.gcodeChange = newGCode(LANG.dv_tool_s, { title: LANG.dv_tool_l, modes: FDM_CAM, area: gcode })).button,
+                (ui.gcodeDwell = newGCode(LANG.dv_dwll_s, { title: LANG.dv_dwll_l, modes: CAM, area: gcode })).button,
+                (ui.gcodeSpindle = newGCode(LANG.dv_sspd_s, { title: LANG.dv_sspd_l, modes: CAM, area: gcode, show: () => ui.spindleMax.value > 0 })).button
+            ], { class: "ext-buttons f-row gcode-macros" }),
 
             /** Preferences Menu */
 
-            _____:            newGroup(LANG.op_menu, $('prefs-gen1'), {inline}),
-            antiAlias:        newBoolean(LANG.op_anta_s, booleanSave, {title:LANG.op_anta_l}),
-            reverseZoom:      newBoolean(LANG.op_invr_s, booleanSave, {title:LANG.op_invr_l}),
-            ortho:            newBoolean(LANG.op_orth_s, booleanSave, {title:LANG.op_orth_l}),
-            dark:             newBoolean(LANG.op_dark_s, booleanSave, {title:LANG.op_dark_l}),
-            drawer:           newBoolean('slide out', booleanSave, {title:'slide out settings drawer'}),
-            scrolls:          newBoolean('scrollbars', booleanSave, {title:'show scrollbars'}),
-            devel:            newBoolean(LANG.op_devl_s, booleanSave, {title:LANG.op_devl_l}),
-            _____:            newGroup(LANG.op_disp, $('prefs-gen2'), {inline}),
-            showOrigin:       newBoolean(LANG.op_shor_s, booleanSave, {title:LANG.op_shor_l}),
-            showRulers:       newBoolean(LANG.op_shru_s, booleanSave, {title:LANG.op_shru_l}),
-            showSpeeds:       newBoolean(LANG.op_sped_s, speedSave, {title:LANG.op_sped_l}),
-            shiny:            newBoolean(LANG.op_shny_s, booleanSave, {title:LANG.op_shny_l, modes:FDM}),
-            lineType:         newSelect(LANG.op_line_s, {title: LANG.op_line_l, action: lineTypeSave, modes:FDM}, "linetype"),
-            animesh:          newSelect(LANG.op_anim_s, {title: LANG.op_anim_l, action: aniMeshSave, modes:CAM}, "animesh"),
-            units:            newSelect(LANG.op_unit_s, {title: LANG.op_unit_l, action: unitsSave, modes:CAM}, "units"),
-            edgeangle:        newInput(LANG.op_spoa_s, {title:LANG.op_spoa_l, convert:toFloat, size:3}),
-            _____:            newGroup(LANG.lo_menu, $('prefs-lay'), {inline}),
-            autoSave:         newBoolean(LANG.op_save_s, booleanSave, {title:LANG.op_save_l}),
-            autoLayout:       newBoolean(LANG.op_auto_s, booleanSave, {title:LANG.op_auto_l}),
-            freeLayout:       newBoolean(LANG.op_free_s, booleanSave, {title:LANG.op_free_l}),
-            spaceRandoX:      newBoolean(LANG.op_spcx_s, booleanSave, {title:LANG.op_spcx_l, show:isBelt}),
-            spaceLayout:      newInput(LANG.op_spcr_s, {title:LANG.op_spcr_l, convert:toFloat, size:3, units}),
-            _____:            newGroup(LANG.xp_menu, $('prefs-xpo'), {inline: true}),
-            exportLocal:      newBoolean(`Grid:Local`, booleanSave, {title:LANG.op_exgl_l}),
-            exportGhost:      newBoolean(`Grid:Host`, booleanSave, {title:LANG.op_exgh_l}),
-            exportOcto:       newBoolean(`OctoPrint`, booleanSave, {title:LANG.op_exop_l}),
-            exportThumb:      newBoolean(`Thumbnail`, booleanSave, {modes:FDM}),
-            exportPreview:    newBoolean(`Code Preview`, booleanSave),
-            _____:            newGroup(LANG.pt_menu, $('prefs-prt'), {inline}),
-            detail:           newSelect(LANG.pt_qual_s, {title: LANG.pt_qual_l, action: detailSave}, "detail"),
-            healMesh:         newBoolean(LANG.pt_heal_s, booleanSave, {title: LANG.pt_heal_l}),
-            threaded:         newBoolean(LANG.pt_thrd_s, booleanSave, {title: LANG.pt_thrd_l, modes:THREED}),
-            assembly:         newBoolean(LANG.pt_assy_s, booleanSave, {title: LANG.pt_assy_l, modes:THREED}),
+            _____: newGroup(LANG.op_menu, $('prefs-gen1'), { inline }),
+            antiAlias: newBoolean(LANG.op_anta_s, booleanSave, { title: LANG.op_anta_l }),
+            reverseZoom: newBoolean(LANG.op_invr_s, booleanSave, { title: LANG.op_invr_l }),
+            ortho: newBoolean(LANG.op_orth_s, booleanSave, { title: LANG.op_orth_l }),
+            dark: newBoolean(LANG.op_dark_s, booleanSave, { title: LANG.op_dark_l }),
+            drawer: newBoolean('slide out', booleanSave, { title: 'slide out settings drawer' }),
+            scrolls: newBoolean('scrollbars', booleanSave, { title: 'show scrollbars' }),
+            devel: newBoolean(LANG.op_devl_s, booleanSave, { title: LANG.op_devl_l }),
+            _____: newGroup(LANG.op_disp, $('prefs-gen2'), { inline }),
+            showOrigin: newBoolean(LANG.op_shor_s, booleanSave, { title: LANG.op_shor_l }),
+            showRulers: newBoolean(LANG.op_shru_s, booleanSave, { title: LANG.op_shru_l }),
+            showSpeeds: newBoolean(LANG.op_sped_s, speedSave, { title: LANG.op_sped_l }),
+            shiny: newBoolean(LANG.op_shny_s, booleanSave, { title: LANG.op_shny_l, modes: FDM }),
+            lineType: newSelect(LANG.op_line_s, { title: LANG.op_line_l, action: lineTypeSave, modes: FDM }, "linetype"),
+            animesh: newSelect(LANG.op_anim_s, { title: LANG.op_anim_l, action: aniMeshSave, modes: CAM }, "animesh"),
+            units: newSelect(LANG.op_unit_s, { title: LANG.op_unit_l, action: unitsSave, modes: CAM }, "units"),
+            edgeangle: newInput(LANG.op_spoa_s, { title: LANG.op_spoa_l, convert: toFloat, size: 3 }),
+            _____: newGroup(LANG.lo_menu, $('prefs-lay'), { inline }),
+            autoSave: newBoolean(LANG.op_save_s, booleanSave, { title: LANG.op_save_l }),
+            autoLayout: newBoolean(LANG.op_auto_s, booleanSave, { title: LANG.op_auto_l }),
+            freeLayout: newBoolean(LANG.op_free_s, booleanSave, { title: LANG.op_free_l }),
+            spaceRandoX: newBoolean(LANG.op_spcx_s, booleanSave, { title: LANG.op_spcx_l, show: isBelt }),
+            spaceLayout: newInput(LANG.op_spcr_s, { title: LANG.op_spcr_l, convert: toFloat, size: 3, units }),
+            _____: newGroup(LANG.xp_menu, $('prefs-xpo'), { inline: true }),
+            exportLocal: newBoolean(`Grid:Local`, booleanSave, { title: LANG.op_exgl_l }),
+            exportGhost: newBoolean(`Grid:Host`, booleanSave, { title: LANG.op_exgh_l }),
+            exportOcto: newBoolean(`OctoPrint`, booleanSave, { title: LANG.op_exop_l }),
+            exportThumb: newBoolean(`Thumbnail`, booleanSave, { modes: FDM }),
+            exportPreview: newBoolean(`Code Preview`, booleanSave),
+            _____: newGroup(LANG.pt_menu, $('prefs-prt'), { inline }),
+            detail: newSelect(LANG.pt_qual_s, { title: LANG.pt_qual_l, action: detailSave }, "detail"),
+            healMesh: newBoolean(LANG.pt_heal_s, booleanSave, { title: LANG.pt_heal_l }),
+            threaded: newBoolean(LANG.pt_thrd_s, booleanSave, { title: LANG.pt_thrd_l, modes: THREED }),
+            assembly: newBoolean(LANG.pt_assy_s, booleanSave, { title: LANG.pt_assy_l, modes: THREED }),
 
-            prefadd:          uc.checkpoint($('prefs-add')),
+            prefadd: uc.checkpoint($('prefs-add')),
 
             /** FDM Settings */
 
-            _____:               newGroup(LANG.sl_menu, $('fdm-layers'), { modes:FDM, driven, hideable, separator, group:"fdm-layers" }),
-            sliceHeight:         newInput(LANG.sl_lahi_s, { title:LANG.sl_lahi_l, convert:toFloat }),
-            sliceMinHeight:      newInput(LANG.ad_minl_s, { title:LANG.ad_minl_l, convert:toFloat, bound:bound(0,3.0), show:() => ui.sliceAdaptive.checked }),
-            sliceTopLayers:      newInput(LANG.sl_ltop_s, { title:LANG.sl_ltop_l, convert:toInt }),
-            sliceBottomLayers:   newInput(LANG.sl_lbot_s, { title:LANG.sl_lbot_l, convert:toInt }),
-            separator:           newBlank({ class:"set-sep", driven }),
-            sliceAdaptive:       newBoolean(LANG.ad_adap_s, onBooleanClick, { title: LANG.ad_adap_l }),
-            _____:               newGroup(LANG.sw_menu, $('fdm-walls'), { modes:FDM, driven, hideable, separator, group:"fdm-walls" }),
-            sliceShells:         newInput(LANG.sl_shel_s, { title:LANG.sl_shel_l, convert:toFloat }),
-            sliceLineWidth:      newInput(LANG.sl_line_s, { title:LANG.sl_line_l, convert:toFloat, bound:bound(0,5) }),
-            separator:           newBlank({ class:"set-sep", driven }),
-            sliceShellOrder:     newSelect(LANG.sl_ordr_s, { title:LANG.sl_ordr_l}, "shell"),
-            sliceDetectThin:     newSelect(LANG.ad_thin_s, { title: LANG.ad_thin_l, action: thinWallSave }, "thin"),
-            outputAlternating:   newBoolean(LANG.ad_altr_s, onBooleanClick, {title:LANG.ad_altr_l}),
-            sliceZInterleave:    newBoolean(LANG.ad_zint_s, onBooleanClick, {title:LANG.ad_zint_l, show:zIntShow}),
-            _____:               newGroup(LANG.fi_menu, $('fdm-fill'), { modes:FDM, driven, hideable, separator, group:"fdm-fill" }),
-            sliceFillType:       newSelect(LANG.fi_type, {trigger}, "infill"),
-            sliceFillSparse:     newInput(LANG.fi_pcnt_s, {title:LANG.fi_pcnt_l, convert:toFloat, bound:bound(0.0,1.0), show:hasInfill}),
-            sliceFillRepeat:     newInput(LANG.fi_rept_s, {title:LANG.fi_rept_l, convert:toInt,   bound:bound(1,10),    show:fillIsLinear}),
-            sliceFillOverlap:    newInput(LANG.fi_over_s, {title:LANG.fi_over_l, convert:toFloat, bound:bound(0.0,2.0), show:hasInfill}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            sliceFillRate:       newInput(LANG.ou_feed_s, {title:LANG.ou_feed_l, convert:toInt,   bound:bound(0,500)}),
-            sliceSolidRate:      newInput(LANG.ou_fini_s, {title:LANG.ou_fini_l, convert:toInt,   bound:bound(0,500)}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            sliceFillGrow:       newInput(LANG.fi_grow_s, {title:LANG.fi_grow_l, convert:toFloat}),
-            sliceFillAngle:      newInput(LANG.fi_angl_s, {title:LANG.fi_angl_l, convert:toFloat}),
-            _____:               newGroup(LANG.fh_menu, $('fdm-heat'), { modes:FDM, driven, hideable, separator, group:"fdm-heat" }),
-            outputTemp:          newInput(LANG.ou_nozl_s, {title:LANG.ou_nozl_l, convert:toInt}),
-            outputBedTemp:       newInput(LANG.ou_bedd_s, {title:LANG.ou_bedd_l, convert:toInt}),
-            _____:               newGroup(LANG.fc_menu, $('fdm-cool'), { modes:FDM, driven, hideable, separator, group:"fdm-cool" }),
-            outputFanLayer:      newInput(LANG.ou_fanl_s, { title:LANG.ou_fanl_l, convert:toInt,   bound:bound(0,255) }),
-            outputFanSpeed:      newInput(LANG.ou_fans_s, {title:LANG.ou_fans_l, convert:toInt, bound:bound(0,255)}),
-            _____:               newGroup(LANG.sp_menu, $('fdm-support'), { modes:FDM, driven, hideable, separator, group:"fdm-supp" }),
-            sliceSupportNozzle:  newSelect(LANG.sp_nozl_s, {title:LANG.sp_nozl_l, show:isMultiHead}, "extruders"),
-            sliceSupportDensity: newInput(LANG.sp_dens_s, {title:LANG.sp_dens_l, convert:toFloat, bound:bound(0.0,1.0)}),
-            sliceSupportSize:    newInput(LANG.sp_size_s, {title:LANG.sp_size_l, convert:toFloat, bound:bound(1.0,200.0)}),
-            sliceSupportOffset:  newInput(LANG.sp_offs_s, {title:LANG.sp_offs_l, convert:toFloat, bound:bound(0.0,200.0)}),
-            sliceSupportGap:     newInput(LANG.sp_gaps_s, {title:LANG.sp_gaps_l, convert:toInt,   bound:bound(0,5)}),
-            sliceSupportArea:    newInput(LANG.sp_area_s, {title:LANG.sp_area_l, convert:toFloat, bound:bound(0.0,200.0)}),
-            sliceSupportExtra:   newInput(LANG.sp_xpnd_s, {title:LANG.sp_xpnd_l, convert:toFloat, bound:bound(0.0,10.0)}),
-            sliceSupportGrow:    newInput(LANG.sp_grow_s, {title:LANG.sp_grow_l, convert:toFloat, bound:bound(0.0,10.0)}),
-            sliceSupportAngle:   newInput(LANG.sp_angl_s, {title:LANG.sp_angl_l, convert:toFloat, bound:bound(0.0,90.0)}),
-            sliceSupportSpan:    newInput(LANG.sp_span_s, {title:LANG.sp_span_l, convert:toFloat, bound:bound(0.0,200.0), show:() => ui.sliceSupportEnable.checked }),
-            separator:           newBlank({ class:"set-sep", driven }),
-            sliceSupportEnable:  newBoolean(LANG.sp_auto_s, onBooleanClick, {title:LANG.sp_auto_l, show:isNotBelt}),
-            sliceSupportOutline: newBoolean(LANG.sp_outl_s, onBooleanClick, {title:LANG.sp_outl_l}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            sliceSupportGen:     newRow([
-                ui.ssaGen = newButton(LANG.sp_detect, onButtonClick, {class: "f-col grow a-center"})
+            _____: newGroup(LANG.sl_menu, $('fdm-layers'), { modes: FDM, driven, hideable, separator, group: "fdm-layers" }),
+            sliceHeight: newInput(LANG.sl_lahi_s, { title: LANG.sl_lahi_l, convert: toFloat }),
+            sliceMinHeight: newInput(LANG.ad_minl_s, { title: LANG.ad_minl_l, convert: toFloat, bound: bound(0, 3.0), show: () => ui.sliceAdaptive.checked }),
+            sliceTopLayers: newInput(LANG.sl_ltop_s, { title: LANG.sl_ltop_l, convert: toInt }),
+            sliceBottomLayers: newInput(LANG.sl_lbot_s, { title: LANG.sl_lbot_l, convert: toInt }),
+            separator: newBlank({ class: "set-sep", driven }),
+            sliceAdaptive: newBoolean(LANG.ad_adap_s, onBooleanClick, { title: LANG.ad_adap_l }),
+            _____: newGroup(LANG.sw_menu, $('fdm-walls'), { modes: FDM, driven, hideable, separator, group: "fdm-walls" }),
+            sliceShells: newInput(LANG.sl_shel_s, { title: LANG.sl_shel_l, convert: toFloat }),
+            sliceLineWidth: newInput(LANG.sl_line_s, { title: LANG.sl_line_l, convert: toFloat, bound: bound(0, 5) }),
+            separator: newBlank({ class: "set-sep", driven }),
+            sliceShellOrder: newSelect(LANG.sl_ordr_s, { title: LANG.sl_ordr_l }, "shell"),
+            sliceDetectThin: newSelect(LANG.ad_thin_s, { title: LANG.ad_thin_l, action: thinWallSave }, "thin"),
+            outputAlternating: newBoolean(LANG.ad_altr_s, onBooleanClick, { title: LANG.ad_altr_l }),
+            sliceZInterleave: newBoolean(LANG.ad_zint_s, onBooleanClick, { title: LANG.ad_zint_l, show: zIntShow }),
+            _____: newGroup(LANG.fi_menu, $('fdm-fill'), { modes: FDM, driven, hideable, separator, group: "fdm-fill" }),
+            sliceFillType: newSelect(LANG.fi_type, { trigger }, "infill"),
+            sliceFillSparse: newInput(LANG.fi_pcnt_s, { title: LANG.fi_pcnt_l, convert: toFloat, bound: bound(0.0, 1.0), show: hasInfill }),
+            sliceFillRepeat: newInput(LANG.fi_rept_s, { title: LANG.fi_rept_l, convert: toInt, bound: bound(1, 10), show: fillIsLinear }),
+            sliceFillOverlap: newInput(LANG.fi_over_s, { title: LANG.fi_over_l, convert: toFloat, bound: bound(0.0, 2.0), show: hasInfill }),
+            separator: newBlank({ class: "set-sep", driven }),
+            sliceFillRate: newInput(LANG.ou_feed_s, { title: LANG.ou_feed_l, convert: toInt, bound: bound(0, 500) }),
+            sliceSolidRate: newInput(LANG.ou_fini_s, { title: LANG.ou_fini_l, convert: toInt, bound: bound(0, 500) }),
+            separator: newBlank({ class: "set-sep", driven }),
+            sliceFillGrow: newInput(LANG.fi_grow_s, { title: LANG.fi_grow_l, convert: toFloat }),
+            sliceFillAngle: newInput(LANG.fi_angl_s, { title: LANG.fi_angl_l, convert: toFloat }),
+            _____: newGroup(LANG.fh_menu, $('fdm-heat'), { modes: FDM, driven, hideable, separator, group: "fdm-heat" }),
+            outputTemp: newInput(LANG.ou_nozl_s, { title: LANG.ou_nozl_l, convert: toInt }),
+            outputBedTemp: newInput(LANG.ou_bedd_s, { title: LANG.ou_bedd_l, convert: toInt }),
+            _____: newGroup(LANG.fc_menu, $('fdm-cool'), { modes: FDM, driven, hideable, separator, group: "fdm-cool" }),
+            outputFanLayer: newInput(LANG.ou_fanl_s, { title: LANG.ou_fanl_l, convert: toInt, bound: bound(0, 255) }),
+            outputFanSpeed: newInput(LANG.ou_fans_s, { title: LANG.ou_fans_l, convert: toInt, bound: bound(0, 255) }),
+            _____: newGroup(LANG.sp_menu, $('fdm-support'), { modes: FDM, driven, hideable, separator, group: "fdm-supp" }),
+            sliceSupportNozzle: newSelect(LANG.sp_nozl_s, { title: LANG.sp_nozl_l, show: isMultiHead }, "extruders"),
+            sliceSupportDensity: newInput(LANG.sp_dens_s, { title: LANG.sp_dens_l, convert: toFloat, bound: bound(0.0, 1.0) }),
+            sliceSupportSize: newInput(LANG.sp_size_s, { title: LANG.sp_size_l, convert: toFloat, bound: bound(1.0, 200.0) }),
+            sliceSupportOffset: newInput(LANG.sp_offs_s, { title: LANG.sp_offs_l, convert: toFloat, bound: bound(0.0, 200.0) }),
+            sliceSupportGap: newInput(LANG.sp_gaps_s, { title: LANG.sp_gaps_l, convert: toInt, bound: bound(0, 5) }),
+            sliceSupportArea: newInput(LANG.sp_area_s, { title: LANG.sp_area_l, convert: toFloat, bound: bound(0.0, 200.0) }),
+            sliceSupportExtra: newInput(LANG.sp_xpnd_s, { title: LANG.sp_xpnd_l, convert: toFloat, bound: bound(0.0, 10.0) }),
+            sliceSupportGrow: newInput(LANG.sp_grow_s, { title: LANG.sp_grow_l, convert: toFloat, bound: bound(0.0, 10.0) }),
+            sliceSupportAngle: newInput(LANG.sp_angl_s, { title: LANG.sp_angl_l, convert: toFloat, bound: bound(0.0, 90.0) }),
+            sliceSupportSpan: newInput(LANG.sp_span_s, { title: LANG.sp_span_l, convert: toFloat, bound: bound(0.0, 200.0), show: () => ui.sliceSupportEnable.checked }),
+            separator: newBlank({ class: "set-sep", driven }),
+            sliceSupportEnable: newBoolean(LANG.sp_auto_s, onBooleanClick, { title: LANG.sp_auto_l, show: isNotBelt }),
+            sliceSupportOutline: newBoolean(LANG.sp_outl_s, onBooleanClick, { title: LANG.sp_outl_l }),
+            separator: newBlank({ class: "set-sep", driven }),
+            sliceSupportGen: newRow([
+                ui.ssaGen = newButton(LANG.sp_detect, onButtonClick, { class: "f-col grow a-center" })
             ], { modes: FDM, class: "ext-buttons f-row grow" }),
-            separator:           newBlank({ class:"set-sep", driven }),
+            separator: newBlank({ class: "set-sep", driven }),
             sliceSupportManual: newRow([
-                (ui.ssmAdd = newButton(undefined, onButtonClick, {icon:'<i class="fas fa-plus"></i>'})),
-                (ui.ssmDun = newButton(undefined, onButtonClick, {icon:'<i class="fas fa-check"></i>'})),
-                (ui.ssmClr = newButton(undefined, onButtonClick, {icon:'<i class="fas fa-trash-alt"></i>'}))
-            ], {class:"ext-buttons f-row"}),
-            _____:               newGroup(LANG.fl_menu, $('fdm-base'), { modes:FDM, driven, hideable, separator, group:"fdm-base" }),
-            firstSliceHeight:    newInput(LANG.fl_lahi_s, {title:LANG.fl_lahi_l, convert:toFloat, show:isNotBelt}),
-            firstLayerNozzleTemp:newInput(LANG.fl_nozl_s, {title:LANG.fl_nozl_l, convert:toInt,   show:isNotBelt}),
-            firstLayerBedTemp:   newInput(LANG.fl_bedd_s, {title:LANG.fl_bedd_l, convert:toInt,   show:isNotBelt}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            firstLayerFanSpeed:  newInput(LANG.ou_fans_s, {title:LANG.ou_fans_l, convert:toInt,   bound:bound(0,255), show:isBelt}),
-            firstLayerYOffset:   newInput(LANG.fl_zoff_s, {title:LANG.fl_zoff_l, convert:toFloat, show:isBelt}),
-            firstLayerFlatten:   newInput(LANG.fl_flat_s, {title:LANG.fl_flat_l, convert:toFloat, show:isBelt}),
-            firstLayerRate:      newInput(LANG.fl_rate_s, {title:LANG.fl_rate_l, convert:toFloat}),
-            firstLayerFillRate:  newInput(LANG.fl_frat_s, {title:LANG.fl_frat_l, convert:toFloat, show:isNotBelt}),
-            separator:           newBlank({ class:"set-sep", driven, show:isNotBelt }),
-            firstLayerLineMult:  newInput(LANG.fl_sfac_s, {title:LANG.fl_sfac_l, convert:toFloat, bound:bound(0.5,2), show:isNotBelt}),
-            firstLayerPrintMult: newInput(LANG.fl_mult_s, {title:LANG.fl_mult_l, convert:toFloat}),
-            separator:           newBlank({ class:"set-sep", driven, show:isBelt }),
-            firstLayerBrim:      newInput(LANG.fl_brim_s, {title:LANG.fl_brim_l, convert:toInt,   show:isBelt}),
-            firstLayerBrimIn:    newInput(LANG.fl_brin_s, {title:LANG.fl_brin_l, convert:toInt,   show:isBelt}),
-            firstLayerBrimTrig:  newInput(LANG.fl_brmn_s, {title:LANG.fl_brmn_l, convert:toInt,   show:isBelt}),
-            firstLayerBrimGap:   newInput(LANG.fl_brgp_s, {title:LANG.fl_brgp_l, convert:toFloat, show:isBelt}),
-            separator:           newBlank({ class:"set-sep", driven, show:isBelt }),
-            firstLayerBeltLead:  newInput(LANG.fl_bled_s, {title:LANG.fl_bled_l, convert:toFloat, show:isBelt}),
-            firstLayerBeltBump:  newInput(LANG.fl_blmp_s, {title:LANG.fl_blmp_l, convert:toFloat, bound:bound(0, 10), show:isBelt}),
-            separator:           newBlank({ class:"set-sep", driven, show:isNotBelt }),
-            outputBrimCount:     newInput(LANG.fl_skrt_s, {title:LANG.fl_skrt_l, convert:toInt,   show:isNotBelt}),
-            outputBrimOffset:    newInput(LANG.fl_skro_s, {title:LANG.fl_skro_l, convert:toFloat, show:isNotBelt}),
-            outputRaftSpacing:   newInput(LANG.fr_spac_s, {title:LANG.fr_spac_l, convert:toFloat, bound:bound(0.0,3.0), show: () => ui.outputRaft.checked && isNotBelt() }),
-            separator:           newBlank({ class:"set-sep", driven, show:isNotBelt }),
-            outputRaft:          newBoolean(LANG.fr_nabl_s, onBooleanClick, {title:LANG.fr_nabl_l, trigger, show:() => isNotBelt()}),
-            outputDraftShield:   newBoolean(LANG.fr_draf_s, onBooleanClick, {title:LANG.fr_draf_l, trigger, show:() => isNotBelt()}),
-            _____:               newGroup(LANG.ou_menu, $('fdm-output'), { modes:FDM, driven, hideable, separator, group:"fdm-out" }),
-            outputFeedrate:      newInput(LANG.ou_feed_s, {title:LANG.ou_feed_l, convert:toInt}),
-            outputFinishrate:    newInput(LANG.ou_fini_s, {title:LANG.ou_fini_l, convert:toInt}),
-            outputSeekrate:      newInput(LANG.ou_move_s, {title:LANG.ou_move_l, convert:toInt}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            outputShellMult:     newInput(LANG.ou_shml_s, {title:LANG.ou_exml_l, convert:toFloat, bound:bound(0.0,2.0)}),
-            outputFillMult:      newInput(LANG.ou_flml_s, {title:LANG.ou_exml_l, convert:toFloat, bound:bound(0.0,2.0)}),
-            outputSparseMult:    newInput(LANG.ou_spml_s, {title:LANG.ou_exml_l, convert:toFloat, bound:bound(0.0,2.0)}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            outputRetractDist:   newInput(LANG.ad_rdst_s, {title:LANG.ad_rdst_l, convert:toFloat}),
-            outputRetractSpeed:  newInput(LANG.ad_rrat_s, {title:LANG.ad_rrat_l, convert:toInt}),
-            outputRetractWipe:   newInput(LANG.ad_wpln_s, {title:LANG.ad_wpln_l, convert:toFloat, bound:bound(0.0,10)}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            sliceLayerStart:     newSelect(LANG.sl_strt_s, {title:LANG.sl_strt_l}, "start"),
-            outputLayerRetract:  newBoolean(LANG.ad_lret_s, onBooleanClick, {title:LANG.ad_lret_l}),
-            outputAvoidGaps:     newBoolean(LANG.ad_agap_s, onBooleanClick, {title:LANG.ad_agap_l}),
-            separator:           newBlank({ class:"set-sep", driven, show:isBelt }),
-            outputBeltFirst:     newBoolean(LANG.ad_lbir_s, onBooleanClick, {title:LANG.ad_lbir_l, show:isBelt}),
-            _____:               newGroup(LANG.ad_menu, $('fdm-expert'), { modes:FDM, driven, hideable, separator, group:"fdm-xprt" }),
-            sliceAngle:          newInput(LANG.sl_angl_s, {title:LANG.sl_angl_l, convert:toFloat, show:isBelt}),
-            outputRetractDwell:  newInput(LANG.ad_rdwl_s, {title:LANG.ad_rdwl_l, convert:toInt}),
-            sliceSolidMinArea:   newInput(LANG.ad_msol_s, {title:LANG.ad_msol_l, convert:toFloat}),
-            outputMinSpeed:      newInput(LANG.ad_mins_s, {title:LANG.ad_mins_l, convert:toFloat, bound:bound(1,200)}),
-            outputShortPoly:     newInput(LANG.ad_spol_s, {title:LANG.ad_spol_l, convert:toFloat, bound:bound(0,10000)}),
-            outputCoastDist:     newInput(LANG.ad_scst_s, {title:LANG.ad_scst_l, convert:toFloat, bound:bound(0.0,10)}),
-            zHopDistance:        newInput(LANG.ad_zhop_s, {title:LANG.ad_zhop_l, convert:toFloat, bound:bound(0,3.0)}),
-            arcTolerance:        newInput(LANG.ad_arct_s, {title:LANG.ad_arct_l, convert:toFloat, bound:bound(0,1.0), show:() => { return isNotBelt() }}),
-            antiBacklash:        newInput(LANG.ad_abkl_s, {title:LANG.ad_abkl_l, convert:toInt,   bound:bound(0,3)}),
-            outputLoops:         newInput(LANG.ag_loop_s, {title:LANG.ag_loop_l, convert:toInt,   bound:bound(-1,1000), show:isBelt}),
-            outputPurgeTower:    newInput(LANG.ad_purg_s, {title:LANG.ad_purg_l, convert:toInt,   bound:bound(0,1000)}),
+                (ui.ssmAdd = newButton(undefined, onButtonClick, { icon: '<i class="fas fa-plus"></i>' })),
+                (ui.ssmDun = newButton(undefined, onButtonClick, { icon: '<i class="fas fa-check"></i>' })),
+                (ui.ssmClr = newButton(undefined, onButtonClick, { icon: '<i class="fas fa-trash-alt"></i>' }))
+            ], { class: "ext-buttons f-row" }),
+            _____: newGroup(LANG.fl_menu, $('fdm-base'), { modes: FDM, driven, hideable, separator, group: "fdm-base" }),
+            firstSliceHeight: newInput(LANG.fl_lahi_s, { title: LANG.fl_lahi_l, convert: toFloat, show: isNotBelt }),
+            firstLayerNozzleTemp: newInput(LANG.fl_nozl_s, { title: LANG.fl_nozl_l, convert: toInt, show: isNotBelt }),
+            firstLayerBedTemp: newInput(LANG.fl_bedd_s, { title: LANG.fl_bedd_l, convert: toInt, show: isNotBelt }),
+            separator: newBlank({ class: "set-sep", driven }),
+            firstLayerFanSpeed: newInput(LANG.ou_fans_s, { title: LANG.ou_fans_l, convert: toInt, bound: bound(0, 255), show: isBelt }),
+            firstLayerYOffset: newInput(LANG.fl_zoff_s, { title: LANG.fl_zoff_l, convert: toFloat, show: isBelt }),
+            firstLayerFlatten: newInput(LANG.fl_flat_s, { title: LANG.fl_flat_l, convert: toFloat, show: isBelt }),
+            firstLayerRate: newInput(LANG.fl_rate_s, { title: LANG.fl_rate_l, convert: toFloat }),
+            firstLayerFillRate: newInput(LANG.fl_frat_s, { title: LANG.fl_frat_l, convert: toFloat, show: isNotBelt }),
+            separator: newBlank({ class: "set-sep", driven, show: isNotBelt }),
+            firstLayerLineMult: newInput(LANG.fl_sfac_s, { title: LANG.fl_sfac_l, convert: toFloat, bound: bound(0.5, 2), show: isNotBelt }),
+            firstLayerPrintMult: newInput(LANG.fl_mult_s, { title: LANG.fl_mult_l, convert: toFloat }),
+            separator: newBlank({ class: "set-sep", driven, show: isBelt }),
+            firstLayerBrim: newInput(LANG.fl_brim_s, { title: LANG.fl_brim_l, convert: toInt, show: isBelt }),
+            firstLayerBrimIn: newInput(LANG.fl_brin_s, { title: LANG.fl_brin_l, convert: toInt, show: isBelt }),
+            firstLayerBrimTrig: newInput(LANG.fl_brmn_s, { title: LANG.fl_brmn_l, convert: toInt, show: isBelt }),
+            firstLayerBrimGap: newInput(LANG.fl_brgp_s, { title: LANG.fl_brgp_l, convert: toFloat, show: isBelt }),
+            separator: newBlank({ class: "set-sep", driven, show: isBelt }),
+            firstLayerBeltLead: newInput(LANG.fl_bled_s, { title: LANG.fl_bled_l, convert: toFloat, show: isBelt }),
+            firstLayerBeltBump: newInput(LANG.fl_blmp_s, { title: LANG.fl_blmp_l, convert: toFloat, bound: bound(0, 10), show: isBelt }),
+            separator: newBlank({ class: "set-sep", driven, show: isNotBelt }),
+            outputBrimCount: newInput(LANG.fl_skrt_s, { title: LANG.fl_skrt_l, convert: toInt, show: isNotBelt }),
+            outputBrimOffset: newInput(LANG.fl_skro_s, { title: LANG.fl_skro_l, convert: toFloat, show: isNotBelt }),
+            outputRaftSpacing: newInput(LANG.fr_spac_s, { title: LANG.fr_spac_l, convert: toFloat, bound: bound(0.0, 3.0), show: () => ui.outputRaft.checked && isNotBelt() }),
+            separator: newBlank({ class: "set-sep", driven, show: isNotBelt }),
+            outputRaft: newBoolean(LANG.fr_nabl_s, onBooleanClick, { title: LANG.fr_nabl_l, trigger, show: () => isNotBelt() }),
+            outputDraftShield: newBoolean(LANG.fr_draf_s, onBooleanClick, { title: LANG.fr_draf_l, trigger, show: () => isNotBelt() }),
+            _____: newGroup(LANG.ou_menu, $('fdm-output'), { modes: FDM, driven, hideable, separator, group: "fdm-out" }),
+            outputFeedrate: newInput(LANG.ou_feed_s, { title: LANG.ou_feed_l, convert: toInt }),
+            outputFinishrate: newInput(LANG.ou_fini_s, { title: LANG.ou_fini_l, convert: toInt }),
+            outputSeekrate: newInput(LANG.ou_move_s, { title: LANG.ou_move_l, convert: toInt }),
+            separator: newBlank({ class: "set-sep", driven }),
+            outputShellMult: newInput(LANG.ou_shml_s, { title: LANG.ou_exml_l, convert: toFloat, bound: bound(0.0, 2.0) }),
+            outputFillMult: newInput(LANG.ou_flml_s, { title: LANG.ou_exml_l, convert: toFloat, bound: bound(0.0, 2.0) }),
+            outputSparseMult: newInput(LANG.ou_spml_s, { title: LANG.ou_exml_l, convert: toFloat, bound: bound(0.0, 2.0) }),
+            separator: newBlank({ class: "set-sep", driven }),
+            outputRetractDist: newInput(LANG.ad_rdst_s, { title: LANG.ad_rdst_l, convert: toFloat }),
+            outputRetractSpeed: newInput(LANG.ad_rrat_s, { title: LANG.ad_rrat_l, convert: toInt }),
+            outputRetractWipe: newInput(LANG.ad_wpln_s, { title: LANG.ad_wpln_l, convert: toFloat, bound: bound(0.0, 10) }),
+            separator: newBlank({ class: "set-sep", driven }),
+            sliceLayerStart: newSelect(LANG.sl_strt_s, { title: LANG.sl_strt_l }, "start"),
+            outputLayerRetract: newBoolean(LANG.ad_lret_s, onBooleanClick, { title: LANG.ad_lret_l }),
+            outputAvoidGaps: newBoolean(LANG.ad_agap_s, onBooleanClick, { title: LANG.ad_agap_l }),
+            separator: newBlank({ class: "set-sep", driven, show: isBelt }),
+            outputBeltFirst: newBoolean(LANG.ad_lbir_s, onBooleanClick, { title: LANG.ad_lbir_l, show: isBelt }),
+            _____: newGroup(LANG.ad_menu, $('fdm-expert'), { modes: FDM, driven, hideable, separator, group: "fdm-xprt" }),
+            sliceAngle: newInput(LANG.sl_angl_s, { title: LANG.sl_angl_l, convert: toFloat, show: isBelt }),
+            outputRetractDwell: newInput(LANG.ad_rdwl_s, { title: LANG.ad_rdwl_l, convert: toInt }),
+            sliceSolidMinArea: newInput(LANG.ad_msol_s, { title: LANG.ad_msol_l, convert: toFloat }),
+            outputMinSpeed: newInput(LANG.ad_mins_s, { title: LANG.ad_mins_l, convert: toFloat, bound: bound(1, 200) }),
+            outputShortPoly: newInput(LANG.ad_spol_s, { title: LANG.ad_spol_l, convert: toFloat, bound: bound(0, 10000) }),
+            outputCoastDist: newInput(LANG.ad_scst_s, { title: LANG.ad_scst_l, convert: toFloat, bound: bound(0.0, 10) }),
+            zHopDistance: newInput(LANG.ad_zhop_s, { title: LANG.ad_zhop_l, convert: toFloat, bound: bound(0, 3.0) }),
+            arcTolerance: newInput(LANG.ad_arct_s, { title: LANG.ad_arct_l, convert: toFloat, bound: bound(0, 1.0), show: () => { return isNotBelt() } }),
+            antiBacklash: newInput(LANG.ad_abkl_s, { title: LANG.ad_abkl_l, convert: toInt, bound: bound(0, 3) }),
+            outputLoops: newInput(LANG.ag_loop_s, { title: LANG.ag_loop_l, convert: toInt, bound: bound(-1, 1000), show: isBelt }),
+            outputPurgeTower: newInput(LANG.ad_purg_s, { title: LANG.ad_purg_l, convert: toInt, bound: bound(0, 1000) }),
 
-            fdmRanges:    $('fdm-ranges'),
+            fdmRanges: $('fdm-ranges'),
 
             /** CAM Settings */
 
-            _____:               newGroup(LANG.ct_menu, $('cam-tabs'), { modes:CAM, marker:true, driven, separator }),
-            camTabsWidth:        newInput(LANG.ct_wdth_s, {title:LANG.ct_wdth_l, convert:toFloat, bound:bound(0.005,100), units}),
-            camTabsHeight:       newInput(LANG.ct_hght_s, {title:LANG.ct_hght_l, convert:toFloat, bound:bound(0.005,100), units}),
-            camTabsDepth:        newInput(LANG.ct_dpth_s, {title:LANG.ct_dpth_l, convert:toFloat, bound:bound(0.005,100), units}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            camTabsMidline:      newBoolean(LANG.ct_midl_s, onBooleanClick, {title:LANG.ct_midl_l}),
-            separator:           newBlank({ class:"set-sep", driven }),
+            _____: newGroup(LANG.ct_menu, $('cam-tabs'), { modes: CAM, marker: true, driven, separator }),
+            camTabsWidth: newInput(LANG.ct_wdth_s, { title: LANG.ct_wdth_l, convert: toFloat, bound: bound(0.005, 100), units }),
+            camTabsHeight: newInput(LANG.ct_hght_s, { title: LANG.ct_hght_l, convert: toFloat, bound: bound(0.005, 100), units }),
+            camTabsDepth: newInput(LANG.ct_dpth_s, { title: LANG.ct_dpth_l, convert: toFloat, bound: bound(0.005, 100), units }),
+            separator: newBlank({ class: "set-sep", driven }),
+            camTabsMidline: newBoolean(LANG.ct_midl_s, onBooleanClick, { title: LANG.ct_midl_l }),
+            separator: newBlank({ class: "set-sep", driven }),
             camTabsManual: newRow([
-                (ui.tabAdd = newButton(undefined, onButtonClick, {icon:'<i class="fas fa-plus"></i>'})),
-                (ui.tabDun = newButton(undefined, onButtonClick, {icon:'<i class="fas fa-check"></i>'})),
-                (ui.tabClr = newButton(undefined, onButtonClick, {icon:'<i class="fas fa-trash-alt"></i>'}))
-            ], {class:"ext-buttons f-row"}),
-            _____:               newGroup(LANG.cs_menu, $('cam-stock'), { modes:CAM, driven, separator }),
-            camStockX:           newInput(LANG.cs_wdth_s, {title:LANG.cs_wdth_l, convert:toFloat, bound:bound(0,9999), units}),
-            camStockY:           newInput(LANG.cs_dpth_s, {title:LANG.cs_dpth_l, convert:toFloat, bound:bound(0,9999), units}),
-            camStockZ:           newInput(LANG.cs_hght_s, {title:LANG.cs_hght_l, convert:toFloat, bound:bound(0,9999), units}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            camStockOffset:      newBoolean(LANG.cs_offs_s, onBooleanClick, {title:LANG.cs_offs_l}),
-            camStockClipTo:      newBoolean(LANG.cs_clip_s, onBooleanClick, {title:LANG.cs_clip_l}),
-            camStockIndexed:     newBoolean(LANG.cs_indx_s, onBooleanClick, {title:LANG.cs_indx_l}),
-            camStockIndexGrid:   newBoolean(LANG.cs_ishg_s, onBooleanClick, {title:LANG.cs_ishg_l, show:() => ui.camStockIndexed.checked}),
-            _____:               newGroup(LANG.cc_menu, $('cam-limits'), { modes:CAM, driven, separator }),
-            camZAnchor:          newSelect(LANG.ou_zanc_s, {title: LANG.ou_zanc_l, action:zAnchorSave, show:() => !ui.camStockIndexed.checked}, "zanchor"),
-            camZOffset:          newInput(LANG.ou_ztof_s, {title:LANG.ou_ztof_l, convert:toFloat, units}),
-            camZTop:             newInput(LANG.ou_ztop_s, {title:LANG.ou_ztop_l, convert:toFloat, units, trigger}),
-            camZBottom:          newInput(LANG.ou_zbot_s, {title:LANG.ou_zbot_l, convert:toFloat, units, trigger}),
-            camZThru:            newInput(LANG.ou_ztru_s, {title:LANG.ou_ztru_l, convert:toFloat, bound:bound(0.0,100), units }),
-            camZClearance:       newInput(LANG.ou_zclr_s, {title:LANG.ou_zclr_l, convert:toFloat, bound:bound(0.01,100), units }),
-            camFastFeedZ:        newInput(LANG.cc_rzpd_s, {title:LANG.cc_rzpd_l, convert:toFloat, units}),
-            camFastFeed:         newInput(LANG.cc_rapd_s, {title:LANG.cc_rapd_l, convert:toFloat, units}),
-            _____:               newGroup(LANG.ou_menu, $('cam-output'), { modes:CAM, driven, separator, group:"cam-output" }),
-            camConventional:     newBoolean(LANG.ou_conv_s, onBooleanClick, {title:LANG.ou_conv_l}),
-            camEaseDown:         newBoolean(LANG.cr_ease_s, onBooleanClick, {title:LANG.cr_ease_l}),
-            camDepthFirst:       newBoolean(LANG.ou_depf_s, onBooleanClick, {title:LANG.ou_depf_l}),
-            camToolInit:         newBoolean(LANG.ou_toin_s, onBooleanClick, {title:LANG.ou_toin_l}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            camFirstZMax:        newBoolean(LANG.ou_z1st_s, onBooleanClick, {title:LANG.ou_z1st_l}),
-            camForceZMax:        newBoolean(LANG.ou_forz_s, onBooleanClick, {title:LANG.ou_forz_l}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            camEaseAngle:        newInput(LANG.ou_eang_s, {title:LANG.ou_eang_l, convert:toFloat, bound:bound(0.1,85), show:() => ui.camEaseDown.checked}),
-            camFullEngage:       newInput(LANG.ou_feng_s, {title:LANG.ou_feng_l, convert:toFloat, bound:bound(0.1,1.0)}),
-            _____:               newGroup(LANG.co_menu, $('cam-origin'), { modes:CAM, driven, separator }),
-            camOriginTop:        newBoolean(LANG.or_topp_s, onBooleanClick, {title:LANG.or_topp_l}),
-            camOriginCenter:     newBoolean(LANG.or_cntr_s, onBooleanClick, {title:LANG.or_cntr_l}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            camOriginOffX:       newInput(LANG.co_offx_s, {title:LANG.co_offx_l, convert:toFloat, units}),
-            camOriginOffY:       newInput(LANG.co_offy_s, {title:LANG.co_offy_l, convert:toFloat, units}),
-            camOriginOffZ:       newInput(LANG.co_offz_s, {title:LANG.co_offz_l, convert:toFloat, units}),
-            _____:               newGroup(LANG.op_xprt_s, $('cam-expert'), { group:"cam_expert", modes:CAM, marker: false, driven, separator }),
-            camExpertFast:       newBoolean(LANG.cx_fast_s, onBooleanClick, {title:LANG.cx_fast_l, show: () => !ui.camTrueShadow.checked }),
-            camTrueShadow:       newBoolean(LANG.cx_true_s, onBooleanClick, {title:LANG.cx_true_l, show: () => !ui.camExpertFast.checked }),
+                (ui.tabAdd = newButton(undefined, onButtonClick, { icon: '<i class="fas fa-plus"></i>' })),
+                (ui.tabDun = newButton(undefined, onButtonClick, { icon: '<i class="fas fa-check"></i>' })),
+                (ui.tabClr = newButton(undefined, onButtonClick, { icon: '<i class="fas fa-trash-alt"></i>' }))
+            ], { class: "ext-buttons f-row" }),
+            _____: newGroup(LANG.cs_menu, $('cam-stock'), { modes: CAM, driven, separator }),
+            camStockX: newInput(LANG.cs_wdth_s, { title: LANG.cs_wdth_l, convert: toFloat, bound: bound(0, 9999), units }),
+            camStockY: newInput(LANG.cs_dpth_s, { title: LANG.cs_dpth_l, convert: toFloat, bound: bound(0, 9999), units }),
+            camStockZ: newInput(LANG.cs_hght_s, { title: LANG.cs_hght_l, convert: toFloat, bound: bound(0, 9999), units }),
+            separator: newBlank({ class: "set-sep", driven }),
+            camStockOffset: newBoolean(LANG.cs_offs_s, onBooleanClick, { title: LANG.cs_offs_l }),
+            camStockClipTo: newBoolean(LANG.cs_clip_s, onBooleanClick, { title: LANG.cs_clip_l }),
+            camStockIndexed: newBoolean(LANG.cs_indx_s, onBooleanClick, { title: LANG.cs_indx_l }),
+            camStockIndexGrid: newBoolean(LANG.cs_ishg_s, onBooleanClick, { title: LANG.cs_ishg_l, show: () => ui.camStockIndexed.checked }),
+            _____: newGroup(LANG.cc_menu, $('cam-limits'), { modes: CAM, driven, separator }),
+            camZAnchor: newSelect(LANG.ou_zanc_s, { title: LANG.ou_zanc_l, action: zAnchorSave, show: () => !ui.camStockIndexed.checked }, "zanchor"),
+            camZOffset: newInput(LANG.ou_ztof_s, { title: LANG.ou_ztof_l, convert: toFloat, units }),
+            camZTop: newInput(LANG.ou_ztop_s, { title: LANG.ou_ztop_l, convert: toFloat, units, trigger }),
+            camZBottom: newInput(LANG.ou_zbot_s, { title: LANG.ou_zbot_l, convert: toFloat, units, trigger }),
+            camZThru: newInput(LANG.ou_ztru_s, { title: LANG.ou_ztru_l, convert: toFloat, bound: bound(0.0, 100), units }),
+            camZClearance: newInput(LANG.ou_zclr_s, { title: LANG.ou_zclr_l, convert: toFloat, bound: bound(0.01, 100), units }),
+            camFastFeedZ: newInput(LANG.cc_rzpd_s, { title: LANG.cc_rzpd_l, convert: toFloat, units }),
+            camFastFeed: newInput(LANG.cc_rapd_s, { title: LANG.cc_rapd_l, convert: toFloat, units }),
+            _____: newGroup(LANG.ou_menu, $('cam-output'), { modes: CAM, driven, separator, group: "cam-output" }),
+            camConventional: newBoolean(LANG.ou_conv_s, onBooleanClick, { title: LANG.ou_conv_l }),
+            camEaseDown: newBoolean(LANG.cr_ease_s, onBooleanClick, { title: LANG.cr_ease_l }),
+            camDepthFirst: newBoolean(LANG.ou_depf_s, onBooleanClick, { title: LANG.ou_depf_l }),
+            camToolInit: newBoolean(LANG.ou_toin_s, onBooleanClick, { title: LANG.ou_toin_l }),
+            separator: newBlank({ class: "set-sep", driven }),
+            camFirstZMax: newBoolean(LANG.ou_z1st_s, onBooleanClick, { title: LANG.ou_z1st_l }),
+            camForceZMax: newBoolean(LANG.ou_forz_s, onBooleanClick, { title: LANG.ou_forz_l }),
+            separator: newBlank({ class: "set-sep", driven }),
+            camEaseAngle: newInput(LANG.ou_eang_s, { title: LANG.ou_eang_l, convert: toFloat, bound: bound(0.1, 85), show: () => ui.camEaseDown.checked }),
+            camFullEngage: newInput(LANG.ou_feng_s, { title: LANG.ou_feng_l, convert: toFloat, bound: bound(0.1, 1.0) }),
+            _____: newGroup(LANG.co_menu, $('cam-origin'), { modes: CAM, driven, separator }),
+            camOriginTop: newBoolean(LANG.or_topp_s, onBooleanClick, { title: LANG.or_topp_l }),
+            camOriginCenter: newBoolean(LANG.or_cntr_s, onBooleanClick, { title: LANG.or_cntr_l }),
+            separator: newBlank({ class: "set-sep", driven }),
+            camOriginOffX: newInput(LANG.co_offx_s, { title: LANG.co_offx_l, convert: toFloat, units }),
+            camOriginOffY: newInput(LANG.co_offy_s, { title: LANG.co_offy_l, convert: toFloat, units }),
+            camOriginOffZ: newInput(LANG.co_offz_s, { title: LANG.co_offz_l, convert: toFloat, units }),
+            _____: newGroup(LANG.op_xprt_s, $('cam-expert'), { group: "cam_expert", modes: CAM, marker: false, driven, separator }),
+            camExpertFast: newBoolean(LANG.cx_fast_s, onBooleanClick, { title: LANG.cx_fast_l, show: () => !ui.camTrueShadow.checked }),
+            camTrueShadow: newBoolean(LANG.cx_true_s, onBooleanClick, { title: LANG.cx_true_l, show: () => !ui.camExpertFast.checked }),
 
             /** LASER/DRAG/WJET/WEDM cut tool Settings */
 
-            _____:               newGroup(LANG.sl_menu, $('lzr-slice'), { modes:TWOD, driven, separator }),
-            ctSliceKerf:         newInput(LANG.ls_offs_s, {title:LANG.ls_offs_l, convert:toFloat}),
-            ctSliceHeight:       newInput(LANG.ls_lahi_s, {title:LANG.ls_lahi_l, convert:toFloat, trigger}),
-            ctSliceHeightMin:    newInput(LANG.ls_lahm_s, {title:LANG.ls_lahm_l, convert:toFloat, show:() => ui.ctSliceHeight.value == 0 && !ui.ctSliceSingle.checked }),
-            separator:           newBlank({ class:"set-sep", driven }),
-            ctSliceSingle:       newBoolean(LANG.ls_sngl_s, onBooleanClick, {title:LANG.ls_sngl_l}),
-            ctOmitInner:         newBoolean(LANG.we_omit_s, onBooleanClick, {title:LANG.we_omit_l, modes:WEDM}),
-            _____:               newGroup('surfaces', $('lzr-surface'), { modes:[-1], driven, separator }),
+            _____: newGroup(LANG.sl_menu, $('lzr-slice'), { modes: TWOD, driven, separator }),
+            ctSliceKerf: newInput(LANG.ls_offs_s, { title: LANG.ls_offs_l, convert: toFloat }),
+            ctSliceHeight: newInput(LANG.ls_lahi_s, { title: LANG.ls_lahi_l, convert: toFloat, trigger }),
+            ctSliceHeightMin: newInput(LANG.ls_lahm_s, { title: LANG.ls_lahm_l, convert: toFloat, show: () => ui.ctSliceHeight.value == 0 && !ui.ctSliceSingle.checked }),
+            separator: newBlank({ class: "set-sep", driven }),
+            ctSliceSingle: newBoolean(LANG.ls_sngl_s, onBooleanClick, { title: LANG.ls_sngl_l }),
+            ctOmitInner: newBoolean(LANG.we_omit_s, onBooleanClick, { title: LANG.we_omit_l, modes: WEDM }),
+            _____: newGroup('surfaces', $('lzr-surface'), { modes: [-1], driven, separator }),
             ctSurfaces: newRow([
-                (ui.faceAdd = newButton(undefined, onButtonClick, {icon:'<i class="fas fa-plus"></i>'})),
-                (ui.faceDun = newButton(undefined, onButtonClick, {icon:'<i class="fas fa-check"></i>'})),
-                (ui.faceClr = newButton(undefined, onButtonClick, {icon:'<i class="fas fa-trash-alt"></i>'}))
-            ], {class:"ext-buttons f-row", modes:WEDM}),
-            _____:               newGroup(LANG.dk_menu, $('lzr-knife'), { modes:DRAG, marker:true, driven, separator }),
-            ctOutKnifeDepth:     newInput(LANG.dk_dpth_s, { title:LANG.dk_dpth_l, convert:toFloat, bound:bound(0.0,5.0) }),
-            ctOutKnifePasses:    newInput(LANG.dk_pass_s, { title:LANG.dk_pass_l, convert:toInt,   bound:bound(0,5) }),
-            ctOutKnifeTip:       newInput(LANG.dk_offs_s, { title:LANG.dk_offs_l, convert:toFloat, bound:bound(0.0,10.0) }),
-            _____:               newGroup(LANG.lo_menu, $('lzr-layout'), { modes:TWOD, driven, separator }),
-            ctOutTileSpacing:    newInput(LANG.ou_spac_s, { title:LANG.ou_spac_l, convert:toInt }),
-            ctOutMerged:         newBoolean(LANG.ou_mrgd_s, onBooleanClick, {title:LANG.ou_mrgd_l, modes:TWONED, show:() => !ui.ctOutStack.checked }),
-            ctOutGroup:          newBoolean(LANG.ou_grpd_s, onBooleanClick, {title:LANG.ou_grpd_l, show:() => !(ui.ctOutMark.checked || ui.ctOutStack.checked) }),
-            _____:               newGroup(LANG.ou_menu, $('lzr-output'), { modes:TWOD, driven, separator, group:"lzr-output" }),
-            ctOutPower:          newInput(LANG.ou_powr_s, {title:LANG.ou_powr_l, convert:toInt, bound:bound(1,100), modes:TWONED }),
-            ctOutSpeed:          newInput(LANG.ou_sped_s, {title:LANG.ou_sped_l, convert:toInt }),
-            ctAdaptive:          newBoolean('adaptive speed', onBooleanClick, {modes:WEDM, title:'controller determines best cutting speed based on material feedback at runtime'}),
-            separator:           newBlank({ class:"set-sep", driven }),
-            ctOriginBounds:      newBoolean(LANG.or_bnds_s, onBooleanClick, { title:LANG.or_bnds_l, show:() => !ui.ctOriginCenter.checked }),
-            ctOriginCenter:      newBoolean(LANG.or_cntr_s, onBooleanClick, { title:LANG.or_cntr_l, show:() => !ui.ctOriginBounds.checked }),
-            separator:           newBlank({ class:"set-sep", driven, modes:WEDM, show:() => ui.ctOriginBounds.checked }),
-            ctOriginOffX:        newInput(LANG.or_offx_s, { title:LANG.or_offx_l, convert:toFloat, modes:WEDM, show:() => ui.ctOriginBounds.checked }),
-            ctOriginOffY:        newInput(LANG.or_offy_s, { title:LANG.or_offy_l, convert:toFloat, modes:WEDM, show:() => ui.ctOriginBounds.checked }),
-            separator:           newBlank({ class:"set-sep", driven, modes:TWONED }),
-            ctOutZColor:         newBoolean(LANG.ou_layo_s, onBooleanClick, { title:LANG.ou_layo_l, modes:TWONED, show:() => !ui.ctOutMerged.checked }),
-            ctOutLayer:          newBoolean(LANG.ou_layr_s, onBooleanClick, { title:LANG.ou_layr_l, modes:TWONED, show:() => !ui.ctOutStack.checked }),
-            ctOutMark:           newBoolean(LANG.ou_lays_s, onBooleanClick, { title:LANG.ou_lays_l, modes:TWONED, show:() => !ui.ctOutStack.checked }),
-            separator:           newBlank({ class:"set-sep", driven, modes:LASER }),
-            ctOutInches:         newBoolean(LANG.ou_inch_s, onBooleanClick, { title:LANG.ou_inch_l, modes:LASER }),
-            ctOutStack:          newBoolean(LANG.ou_stak_s, onBooleanClick, { title:LANG.ou_stak_l, modes:LASER }),
-            ctOutShaper:         newBoolean(LANG.ou_shap_s, onBooleanClick, { title:LANG.ou_shap_l, modes:LASER, show:() => ui.ctOutStack.checked }),
+                (ui.faceAdd = newButton(undefined, onButtonClick, { icon: '<i class="fas fa-plus"></i>' })),
+                (ui.faceDun = newButton(undefined, onButtonClick, { icon: '<i class="fas fa-check"></i>' })),
+                (ui.faceClr = newButton(undefined, onButtonClick, { icon: '<i class="fas fa-trash-alt"></i>' }))
+            ], { class: "ext-buttons f-row", modes: WEDM }),
+            _____: newGroup(LANG.dk_menu, $('lzr-knife'), { modes: DRAG, marker: true, driven, separator }),
+            ctOutKnifeDepth: newInput(LANG.dk_dpth_s, { title: LANG.dk_dpth_l, convert: toFloat, bound: bound(0.0, 5.0) }),
+            ctOutKnifePasses: newInput(LANG.dk_pass_s, { title: LANG.dk_pass_l, convert: toInt, bound: bound(0, 5) }),
+            ctOutKnifeTip: newInput(LANG.dk_offs_s, { title: LANG.dk_offs_l, convert: toFloat, bound: bound(0.0, 10.0) }),
+            _____: newGroup(LANG.lo_menu, $('lzr-layout'), { modes: TWOD, driven, separator }),
+            ctOutTileSpacing: newInput(LANG.ou_spac_s, { title: LANG.ou_spac_l, convert: toInt }),
+            ctOutMerged: newBoolean(LANG.ou_mrgd_s, onBooleanClick, { title: LANG.ou_mrgd_l, modes: TWONED, show: () => !ui.ctOutStack.checked }),
+            ctOutGroup: newBoolean(LANG.ou_grpd_s, onBooleanClick, { title: LANG.ou_grpd_l, show: () => !(ui.ctOutMark.checked || ui.ctOutStack.checked) }),
+            _____: newGroup(LANG.ou_menu, $('lzr-output'), { modes: TWOD, driven, separator, group: "lzr-output" }),
+            ctOutPower: newInput(LANG.ou_powr_s, { title: LANG.ou_powr_l, convert: toInt, bound: bound(1, 100), modes: TWONED }),
+            ctOutSpeed: newInput(LANG.ou_sped_s, { title: LANG.ou_sped_l, convert: toInt }),
+            ctAdaptive: newBoolean('adaptive speed', onBooleanClick, { modes: WEDM, title: 'controller determines best cutting speed based on material feedback at runtime' }),
+            separator: newBlank({ class: "set-sep", driven }),
+            ctOriginBounds: newBoolean(LANG.or_bnds_s, onBooleanClick, { title: LANG.or_bnds_l, show: () => !ui.ctOriginCenter.checked }),
+            ctOriginCenter: newBoolean(LANG.or_cntr_s, onBooleanClick, { title: LANG.or_cntr_l, show: () => !ui.ctOriginBounds.checked }),
+            separator: newBlank({ class: "set-sep", driven, modes: WEDM, show: () => ui.ctOriginBounds.checked }),
+            ctOriginOffX: newInput(LANG.or_offx_s, { title: LANG.or_offx_l, convert: toFloat, modes: WEDM, show: () => ui.ctOriginBounds.checked }),
+            ctOriginOffY: newInput(LANG.or_offy_s, { title: LANG.or_offy_l, convert: toFloat, modes: WEDM, show: () => ui.ctOriginBounds.checked }),
+            separator: newBlank({ class: "set-sep", driven, modes: TWONED }),
+            ctOutZColor: newBoolean(LANG.ou_layo_s, onBooleanClick, { title: LANG.ou_layo_l, modes: TWONED, show: () => !ui.ctOutMerged.checked }),
+            ctOutLayer: newBoolean(LANG.ou_layr_s, onBooleanClick, { title: LANG.ou_layr_l, modes: TWONED, show: () => !ui.ctOutStack.checked }),
+            ctOutMark: newBoolean(LANG.ou_lays_s, onBooleanClick, { title: LANG.ou_lays_l, modes: TWONED, show: () => !ui.ctOutStack.checked }),
+            separator: newBlank({ class: "set-sep", driven, modes: LASER }),
+            ctOutInches: newBoolean(LANG.ou_inch_s, onBooleanClick, { title: LANG.ou_inch_l, modes: LASER }),
+            ctOutStack: newBoolean(LANG.ou_stak_s, onBooleanClick, { title: LANG.ou_stak_l, modes: LASER }),
+            ctOutShaper: newBoolean(LANG.ou_shap_s, onBooleanClick, { title: LANG.ou_shap_l, modes: LASER, show: () => ui.ctOutStack.checked }),
 
             /** SLA SETTINGS */
 
-            slaProc:             newGroup(LANG.sa_menu, $('sla-slice'), { modes:SLA, group:"sla-slice", driven, separator }),
-            slaSlice:            newInput(LANG.sa_lahe_s, {title:LANG.sa_lahe_l, convert:toFloat}),
-            slaShell:            newInput(LANG.sa_shel_s, {title:LANG.sa_shel_l, convert:toFloat}),
-            slaOpenTop:          newBoolean(LANG.sa_otop_s, onBooleanClick, {title:LANG.sa_otop_l}),
-            slaOpenBase:         newBoolean(LANG.sa_obas_s, onBooleanClick, {title:LANG.sa_obas_l}),
-            slaLayers:           newGroup(LANG.sa_layr_m, $('sla-layers'), { modes:SLA, group:"sla-layers", driven, separator }),
-            slaLayerOn:          newInput(LANG.sa_lton_s, {title:LANG.sa_lton_l, convert:toFloat}),
-            slaLayerOff:         newInput(LANG.sa_ltof_s, {title:LANG.sa_ltof_l, convert:toFloat}),
-            slaPeelDist:         newInput(LANG.sa_pldi_s, {title:LANG.sa_pldi_l, convert:toFloat}),
-            slaPeelLiftRate:     newInput(LANG.sa_pllr_s, {title:LANG.sa_pllr_l, convert:toFloat}),
-            slaPeelDropRate:     newInput(LANG.sa_pldr_s, {title:LANG.sa_pldr_l, convert:toFloat}),
-            slaBase:             newGroup(LANG.sa_base_m, $('sla-base'), { modes:SLA, group:"sla-base", driven, separator }),
-            slaBaseLayers:       newInput(LANG.sa_balc_s, {title:LANG.sa_balc_l, convert:toInt}),
-            slaBaseOn:           newInput(LANG.sa_lton_s, {title:LANG.sa_bltn_l, convert:toFloat}),
-            slaBaseOff:          newInput(LANG.sa_ltof_s, {title:LANG.sa_bltf_l, convert:toFloat}),
-            slaBasePeelDist:     newInput(LANG.sa_pldi_s, {title:LANG.sa_pldi_l, convert:toFloat}),
-            slaBasePeelLiftRate: newInput(LANG.sa_pllr_s, {title:LANG.sa_pllr_l, convert:toFloat}),
-            slaFill:             newGroup(LANG.sa_infl_m, $('sla-fill'), { modes:SLA, group:"sla-infill", driven, separator }),
-            slaFillDensity:      newInput(LANG.sa_ifdn_s, {title:LANG.sa_ifdn_l, convert:toFloat, bound:bound(0,1)}),
-            slaFillLine:         newInput(LANG.sa_iflw_s, {title:LANG.sa_iflw_l, convert:toFloat, bound:bound(0,5)}),
-            slaSupport:          newGroup(LANG.sa_supp_m, $('sla-support'), { modes:SLA, group:"sla-support", driven, separator }),
-            slaSupportLayers:    newInput(LANG.sa_slyr_s, {title:LANG.sa_slyr_l, convert:toInt,   bound:bound(5,100)}),
-            slaSupportGap:       newInput(LANG.sa_slgp_s, {title:LANG.sa_slgp_l, convert:toInt,   bound:bound(3,30)}),
-            slaSupportDensity:   newInput(LANG.sa_sldn_s, {title:LANG.sa_sldn_l, convert:toFloat, bound:bound(0.01,0.9)}),
-            slaSupportSize:      newInput(LANG.sa_slsz_s, {title:LANG.sa_slsz_l, convert:toFloat, bound:bound(0.1,1)}),
-            slaSupportPoints:    newInput(LANG.sa_slpt_s, {title:LANG.sa_slpt_l, convert:toInt,   bound:bound(3,10)}),
-            slaSupportEnable:    newBoolean(LANG.enable, onBooleanClick, {title:LANG.sl_slen_l}),
-            slaOutput:           newGroup(LANG.sa_outp_m, $('sla-output'), { modes:SLA, driven, separator, group:"sla-output" }),
-            slaFirstOffset:      newInput(LANG.sa_opzo_s, {title:LANG.sa_opzo_l, convert:toFloat, bound:bound(0,1)}),
-            slaAntiAlias:        newSelect(LANG.sa_opaa_s, {title:LANG.sa_opaa_l}, "antialias"),
+            slaProc: newGroup(LANG.sa_menu, $('sla-slice'), { modes: SLA, group: "sla-slice", driven, separator }),
+            slaSlice: newInput(LANG.sa_lahe_s, { title: LANG.sa_lahe_l, convert: toFloat }),
+            slaShell: newInput(LANG.sa_shel_s, { title: LANG.sa_shel_l, convert: toFloat }),
+            slaOpenTop: newBoolean(LANG.sa_otop_s, onBooleanClick, { title: LANG.sa_otop_l }),
+            slaOpenBase: newBoolean(LANG.sa_obas_s, onBooleanClick, { title: LANG.sa_obas_l }),
+            slaLayers: newGroup(LANG.sa_layr_m, $('sla-layers'), { modes: SLA, group: "sla-layers", driven, separator }),
+            slaLayerOn: newInput(LANG.sa_lton_s, { title: LANG.sa_lton_l, convert: toFloat }),
+            slaLayerOff: newInput(LANG.sa_ltof_s, { title: LANG.sa_ltof_l, convert: toFloat }),
+            slaPeelDist: newInput(LANG.sa_pldi_s, { title: LANG.sa_pldi_l, convert: toFloat }),
+            slaPeelLiftRate: newInput(LANG.sa_pllr_s, { title: LANG.sa_pllr_l, convert: toFloat }),
+            slaPeelDropRate: newInput(LANG.sa_pldr_s, { title: LANG.sa_pldr_l, convert: toFloat }),
+            slaBase: newGroup(LANG.sa_base_m, $('sla-base'), { modes: SLA, group: "sla-base", driven, separator }),
+            slaBaseLayers: newInput(LANG.sa_balc_s, { title: LANG.sa_balc_l, convert: toInt }),
+            slaBaseOn: newInput(LANG.sa_lton_s, { title: LANG.sa_bltn_l, convert: toFloat }),
+            slaBaseOff: newInput(LANG.sa_ltof_s, { title: LANG.sa_bltf_l, convert: toFloat }),
+            slaBasePeelDist: newInput(LANG.sa_pldi_s, { title: LANG.sa_pldi_l, convert: toFloat }),
+            slaBasePeelLiftRate: newInput(LANG.sa_pllr_s, { title: LANG.sa_pllr_l, convert: toFloat }),
+            slaFill: newGroup(LANG.sa_infl_m, $('sla-fill'), { modes: SLA, group: "sla-infill", driven, separator }),
+            slaFillDensity: newInput(LANG.sa_ifdn_s, { title: LANG.sa_ifdn_l, convert: toFloat, bound: bound(0, 1) }),
+            slaFillLine: newInput(LANG.sa_iflw_s, { title: LANG.sa_iflw_l, convert: toFloat, bound: bound(0, 5) }),
+            slaSupport: newGroup(LANG.sa_supp_m, $('sla-support'), { modes: SLA, group: "sla-support", driven, separator }),
+            slaSupportLayers: newInput(LANG.sa_slyr_s, { title: LANG.sa_slyr_l, convert: toInt, bound: bound(5, 100) }),
+            slaSupportGap: newInput(LANG.sa_slgp_s, { title: LANG.sa_slgp_l, convert: toInt, bound: bound(3, 30) }),
+            slaSupportDensity: newInput(LANG.sa_sldn_s, { title: LANG.sa_sldn_l, convert: toFloat, bound: bound(0.01, 0.9) }),
+            slaSupportSize: newInput(LANG.sa_slsz_s, { title: LANG.sa_slsz_l, convert: toFloat, bound: bound(0.1, 1) }),
+            slaSupportPoints: newInput(LANG.sa_slpt_s, { title: LANG.sa_slpt_l, convert: toInt, bound: bound(3, 10) }),
+            slaSupportEnable: newBoolean(LANG.enable, onBooleanClick, { title: LANG.sl_slen_l }),
+            slaOutput: newGroup(LANG.sa_outp_m, $('sla-output'), { modes: SLA, driven, separator, group: "sla-output" }),
+            slaFirstOffset: newInput(LANG.sa_opzo_s, { title: LANG.sa_opzo_l, convert: toFloat, bound: bound(0, 1) }),
+            slaAntiAlias: newSelect(LANG.sa_opaa_s, { title: LANG.sa_opaa_l }, "antialias"),
 
-            layers:             uc.setGroup($("layers")),
+            layers: uc.setGroup($("layers")),
 
-            settingsName:       $('settingsName'),
-            settingsSave:       $('settingsSave'),
+            settingsName: $('settingsName'),
+            settingsSave: $('settingsSave'),
         });
 
         // override old style settings two-button menu
@@ -1394,7 +1403,7 @@ gapp.register("kiri.init", (root, exports) => {
         const slbar = mobile ? 80 : 30;
         const slbar2 = slbar * 2;
         const slider = ui.sliderRange;
-        const drag = { };
+        const drag = {};
 
         if (mobile) {
             ui.slider.classList.add('slider-mobile');
@@ -1405,7 +1414,7 @@ gapp.register("kiri.init", (root, exports) => {
         }
 
         function pxToInt(txt) {
-            return txt ? parseInt(txt.substring(0,txt.length-2)) : 0;
+            return txt ? parseInt(txt.substring(0, txt.length - 2)) : 0;
         }
 
         function sliderUpdate() {
@@ -1487,17 +1496,17 @@ gapp.register("kiri.init", (root, exports) => {
             sliderUpdate();
         });
 
-        ui.load.onchange = function(event) {
+        ui.load.onchange = function (event) {
             api.platform.load_files(event.target.files);
             ui.load.value = ''; // reset so you can re-import the same filee
         };
 
         ui.sliderMin.onclick = () => {
-            api.show.layer(0,0);
+            api.show.layer(0, 0);
         }
 
         ui.sliderMax.onclick = () => {
-            api.show.layer(api.var.layer_max,0);
+            api.show.layer(api.var.layer_max, 0);
         }
 
         ui.slider.onmouseover = (ev) => {
@@ -1546,35 +1555,35 @@ gapp.register("kiri.init", (root, exports) => {
         });
 
         // bind language choices
-        $('lset-en').onclick = function() {
+        $('lset-en').onclick = function () {
             sdb.setItem('kiri-lang', 'en-us');
             api.space.reload();
         };
-        $('lset-da').onclick = function() {
+        $('lset-da').onclick = function () {
             sdb.setItem('kiri-lang', 'da-dk');
             api.space.reload();
         };
-        $('lset-de').onclick = function() {
+        $('lset-de').onclick = function () {
             sdb.setItem('kiri-lang', 'de-de');
             api.space.reload();
         };
-        $('lset-fr').onclick = function() {
+        $('lset-fr').onclick = function () {
             sdb.setItem('kiri-lang', 'fr-fr');
             api.space.reload();
         };
-        $('lset-pl').onclick = function() {
+        $('lset-pl').onclick = function () {
             sdb.setItem('kiri-lang', 'pl-pl');
             api.space.reload();
         };
-        $('lset-pt').onclick = function() {
+        $('lset-pt').onclick = function () {
             sdb.setItem('kiri-lang', 'pt-pt');
             api.space.reload();
         };
-        $('lset-es').onclick = function() {
+        $('lset-es').onclick = function () {
             sdb.setItem('kiri-lang', 'es-es');
             api.space.reload();
         };
-        $('lset-zh').onclick = function() {
+        $('lset-zh').onclick = function () {
             sdb.setItem('kiri-lang', 'zh');
             api.space.reload();
         };
@@ -1610,7 +1619,7 @@ gapp.register("kiri.init", (root, exports) => {
             if (xr * yr * zr === 0) {
                 return;
             }
-            selection.scale(xr,yr,zr);
+            selection.scale(xr, yr, zr);
             ui.sizeX.was = ui.sizeX.value = xv * xr;
             ui.sizeY.was = ui.sizeY.value = yv * yr;
             ui.sizeZ.was = ui.sizeZ.value = zv * zr;
@@ -1635,7 +1644,7 @@ gapp.register("kiri.init", (root, exports) => {
                 yr = ((tl && yc) || (!tl && yt) ? ra : 1),
                 zr = ((tl && zc) || (!tl && zt) ? ra : 1);
 
-            selection.scale(xr,yr,zr);
+            selection.scale(xr, yr, zr);
             ui.scaleX.was = ui.scaleX.value = xv * xr;
             ui.scaleY.was = ui.scaleY.value = yv * yr;
             ui.scaleZ.was = ui.scaleZ.value = zv * zr;
@@ -1647,39 +1656,39 @@ gapp.register("kiri.init", (root, exports) => {
         }
 
         space.event.onEnterKey([
-            ui.scaleX,        selectionScale,
-            ui.scaleY,        selectionScale,
-            ui.scaleZ,        selectionScale,
-            ui.sizeX,         selectionSize,
-            ui.sizeY,         selectionSize,
-            ui.sizeZ,         selectionSize,
-            ui.toolName,      updateTool,
-            ui.toolNum,       updateTool,
+            ui.scaleX, selectionScale,
+            ui.scaleY, selectionScale,
+            ui.scaleZ, selectionScale,
+            ui.sizeX, selectionSize,
+            ui.sizeY, selectionSize,
+            ui.sizeZ, selectionSize,
+            ui.toolName, updateTool,
+            ui.toolNum, updateTool,
             ui.toolFluteDiam, updateTool,
-            ui.toolFluteLen,  updateTool,
+            ui.toolFluteLen, updateTool,
             ui.toolShaftDiam, updateTool,
-            ui.toolShaftLen,  updateTool,
-            ui.toolTaperTip,  updateTool,
+            ui.toolShaftLen, updateTool,
+            ui.toolTaperTip, updateTool,
             ui.toolTaperAngle, updateTool,
-            $('rot_x'),       selectionRotate,
-            $('rot_y'),       selectionRotate,
-            $('rot_z'),       selectionRotate
+            $('rot_x'), selectionRotate,
+            $('rot_y'), selectionRotate,
+            $('rot_z'), selectionRotate
         ], true);
 
         $('lab-axis').onclick = () => {
             ui.lockX.checked =
-            ui.lockY.checked =
-            ui.lockZ.checked = !(
-                ui.lockX.checked ||
-                ui.lockY.checked ||
-                ui.lockZ.checked
-            );
+                ui.lockY.checked =
+                ui.lockZ.checked = !(
+                    ui.lockX.checked ||
+                    ui.lockY.checked ||
+                    ui.lockZ.checked
+                );
         };
 
         $('scale-reset').onclick = $('lab-scale').onclick = () => {
             selection.scale(1 / ui.scaleX.was, 1 / ui.scaleY.was, 1 / ui.scaleZ.was);
             ui.scaleX.value = ui.scaleY.value = ui.scaleZ.value =
-            ui.scaleX.was = ui.scaleY.was = ui.scaleZ.was = 1;
+                ui.scaleX.was = ui.scaleY.was = ui.scaleZ.was = 1;
         };
 
         $('app-xpnd').onclick = () => {
@@ -1727,12 +1736,12 @@ gapp.register("kiri.init", (root, exports) => {
         function mouseOnHover(int, event, ints) {
             if (!api.feature.hover) return;
             if (!int) return api.feature.hovers || api.widgets.meshes();
-            api.event.emit('mouse.hover', {int, ints, event, point: int.point, type: 'widget'});
+            api.event.emit('mouse.hover', { int, ints, event, point: int.point, type: 'widget' });
         }
 
         function platformOnHover(int, event) {
             if (!api.feature.hover) return;
-            if (int) api.event.emit('mouse.hover', {point: int, event, type: 'platform'});
+            if (int) api.event.emit('mouse.hover', { point: int, event, type: 'platform' });
         }
 
         api.event.on("feature.hover", enable => {
@@ -1759,7 +1768,7 @@ gapp.register("kiri.init", (root, exports) => {
             }
             if (api.feature.hover) {
                 if (int) {
-                    return api.event.emit('mouse.hover.down', {int, point: int.point});
+                    return api.event.emit('mouse.hover.down', { int, point: int.point });
                 } else {
                     return selection.meshes();
                 }
@@ -1768,7 +1777,7 @@ gapp.register("kiri.init", (root, exports) => {
             if (int && (event.ctrlKey || event.metaKey || api.feature.on_face_select)) {
                 let q = new THREE.Quaternion();
                 // find intersecting point, look "up" on Z and rotate to face that
-                q.setFromUnitVectors(int.face.normal, new THREE.Vector3(0,0,-1));
+                q.setFromUnitVectors(int.face.normal, new THREE.Vector3(0, 0, -1));
                 selection.rotate(q);
             }
             if (api.view.get() !== VIEWS.ARRANGE) {
@@ -1805,7 +1814,7 @@ gapp.register("kiri.init", (root, exports) => {
             }
         });
 
-        space.mouse.onDrag(function(delta, offset, up = false) {
+        space.mouse.onDrag(function (delta, offset, up = false) {
             if (api.feature.hover) {
                 return;
             }
@@ -1816,8 +1825,8 @@ gapp.register("kiri.init", (root, exports) => {
                 let set = settings();
                 let dev = set.device;
                 let bound = set.bounds_sel;
-                let width = dev.bedWidth/2;
-                let depth = dev.bedDepth/2;
+                let width = dev.bedWidth / 2;
+                let depth = dev.bedDepth / 2;
                 let isout = (
                     bound.min.x <= -width ||
                     bound.min.y <= -depth ||
@@ -1849,22 +1858,22 @@ gapp.register("kiri.init", (root, exports) => {
             if (driver.init) try {
                 driver.init(kiri, api, driver);
             } catch (error) {
-                console.log({driver_init_fail: driver, error})
+                console.log({ driver_init_fail: driver, error })
             }
         });
 
         // load script extensions
-        if (SETUP.s) SETUP.s.forEach(function(lib) {
+        if (SETUP.s) SETUP.s.forEach(function (lib) {
             let scr = DOC.createElement('script');
-            scr.setAttribute('defer',true);
-            scr.setAttribute('src',`/code/${lib}.js?${kiri.version}`);
+            scr.setAttribute('defer', true);
+            scr.setAttribute('src', `/code/${lib}.js?${kiri.version}`);
             DOC.body.appendChild(scr);
-            stats.add('load_'+lib);
+            stats.add('load_' + lib);
             api.event.emit('load.lib', lib);
         });
 
         // load CSS extensions
-        if (SETUP.ss) SETUP.ss.forEach(function(style) {
+        if (SETUP.ss) SETUP.ss.forEach(function (style) {
             style = style.charAt(0) === '/' ? style : `/kiri/style-${style}`;
             let ss = DOC.createElement('link');
             ss.setAttribute("type", "text/css");
@@ -1874,9 +1883,9 @@ gapp.register("kiri.init", (root, exports) => {
         });
 
         // override stored settings
-        if (SETUP.v) SETUP.v.forEach(function(kv) {
+        if (SETUP.v) SETUP.v.forEach(function (kv) {
             kv = kv.split('=');
-            sdb.setItem(kv[0],kv[1]);
+            sdb.setItem(kv[0], kv[1]);
         });
 
         // import octoprint settings
@@ -1887,7 +1896,7 @@ gapp.register("kiri.init", (root, exports) => {
             };
             sdb['octo-host'] = ohost.host;
             sdb['octo-apik'] = ohost.apik;
-            console.log({octoprint:ohost});
+            console.log({ octoprint: ohost });
         }
 
         // load workspace from url
@@ -1897,12 +1906,12 @@ gapp.register("kiri.init", (root, exports) => {
 
         // load an object from url
         if (SETUP.load) {
-            console.log({load:SETUP});
+            console.log({ load: SETUP });
             api.platform.load_url(`${proto}//${SETUP.load[0]}`);
         }
 
         // bind this to UI so main can call it on settings import
-        ui.sync = function() {
+        ui.sync = function () {
             const current = settings();
             const control = current.controller;
 
@@ -1970,7 +1979,7 @@ gapp.register("kiri.init", (root, exports) => {
         setInterval(api.event.alerts, 1000);
 
         // add hide-alerts-on-alert-click
-        ui.alert.dialog.onclick = function() {
+        ui.alert.dialog.onclick = function () {
             api.event.alerts(true);
         };
 
@@ -1998,9 +2007,9 @@ gapp.register("kiri.init", (root, exports) => {
         // add keyboard focus handler (must use for iframes)
         WIN.addEventListener('load', function () {
             WIN.focus();
-            DOC.body.addEventListener('click', function() {
+            DOC.body.addEventListener('click', function () {
                 WIN.focus();
-            },false);
+            }, false);
         });
 
         // dismiss gdpr alert
@@ -2050,19 +2059,19 @@ gapp.register("kiri.init", (root, exports) => {
             selection.update_info();
         };
         // attach button handlers to support targets
-        for (let btn of ["don8pt","don8gh","don8pp"]) {
+        for (let btn of ["don8pt", "don8gh", "don8pp"]) {
             $(btn).onclick = (ev) => {
                 window.open(ev.target.children[0].href);
             }
         }
         // rotation buttons
         let d = (Math.PI / 180);
-        $('rot_x_lt').onclick = () => { selection.rotate(-d * $('rot_x').value,0,0) };
-        $('rot_x_gt').onclick = () => { selection.rotate( d * $('rot_x').value,0,0) };
-        $('rot_y_lt').onclick = () => { selection.rotate(0,-d * $('rot_y').value,0) };
-        $('rot_y_gt').onclick = () => { selection.rotate(0, d * $('rot_y').value,0) };
-        $('rot_z_lt').onclick = () => { selection.rotate(0,0, d * $('rot_z').value) };
-        $('rot_z_gt').onclick = () => { selection.rotate(0,0,-d * $('rot_z').value) };
+        $('rot_x_lt').onclick = () => { selection.rotate(-d * $('rot_x').value, 0, 0) };
+        $('rot_x_gt').onclick = () => { selection.rotate(d * $('rot_x').value, 0, 0) };
+        $('rot_y_lt').onclick = () => { selection.rotate(0, -d * $('rot_y').value, 0) };
+        $('rot_y_gt').onclick = () => { selection.rotate(0, d * $('rot_y').value, 0) };
+        $('rot_z_lt').onclick = () => { selection.rotate(0, 0, d * $('rot_z').value) };
+        $('rot_z_gt').onclick = () => { selection.rotate(0, 0, -d * $('rot_z').value) };
         // rendering options
         $('render-edges').onclick = () => { api.view.edges({ toggle: true }); api.conf.save() };
         $('render-ghost').onclick = () => { api.view.wireframe(false, 0, api.view.is_arrange() ? 0.4 : 0.25); };
@@ -2080,6 +2089,196 @@ gapp.register("kiri.init", (root, exports) => {
                 ev => api.space.set_focus(undefined, ev.object.point)
             );
         };
+
+        function changeColor(hex) {
+
+            api.selection.for_widgets(w => {
+                w.setColor(hex);
+                w.saveState();
+            });
+        }
+
+        document.querySelector("#new-controls").addEventListener("submit", e => {
+            e.preventDefault();
+            platform.deselect();
+            platform.select_all();
+            selection.merge();
+            getQuote(e);
+        });
+
+        async function getQuote(e) {
+            const dialog = document.querySelector("#quote-dialog");
+            dialog.showModal();
+            // Export merged model as STL
+            const stlData = selection.export("stl");
+            const blob = new Blob([stlData], { type: "application/sla" });
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append("file", blob, "model.stl");
+
+            // Include other fields from the form if needed
+            const form = e.target;
+            formData.append("material", form.material.value); // adjust to match your form inputs
+            formData.append("variant", form.variant.value); // adjust to match your form inputs
+            formData.append("infill", form.infill.value);
+            formData.append("layerHeight", form.quality.value);
+            formData.append("nozzleSize", form.nozzleSize.value || "0.4");
+            formData.append("quality", form.quality.value || "0.4");
+            formData.append("complex", space.renderInfo().render.triangles > 1000000 ? "high" : "low");
+
+            space.view.home();
+
+            // Send to backend
+            console.log("Sending quote request with form data:", formData);
+            const response = await fetch("http://127.0.0.1:8282/api/get-quote", {
+                method: "POST",
+                headers: { Accept: "application/json" },
+                body: formData
+            });
+
+            if (!response.ok) {
+                alert("Something went wrong. Please try again.");
+                return;
+            }
+
+            const data = await response.json();
+
+            console.log(data);
+
+            // Display quote (replace this with your own UI logic)
+            dialog.querySelector(".quote-dialog").classList.add("done");
+        }
+
+        let selectedMaterial = null;
+        let selectedVariant = null;
+        fetch("https://jvvkum-8d.myshopify.com/api/2023-07/graphql.json", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Shopify-Storefront-Access-Token": "579bfc9cd9361e2024d447421e2f066e"
+            },
+            body: JSON.stringify({
+                query: `
+      {
+        products(first: 50, query: "toproduct_type:3D Print material", sortKey: BEST_SELLING) {
+          edges {
+            node {
+              id
+              title
+              onlineStoreUrl
+              variants(first: 30, sortKey: TITLE) {
+                edges {
+                  node {
+                    id
+                    title
+                    image {
+                        url
+                    }
+                    metafield(namespace: \"custom\", key: \"color\") {
+                        value
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                const materialInput = document.getElementById("material-input");
+                data.data.products.edges.forEach(product => {
+                    const productOption = document.createElement("option");
+                    productOption.value = product.node.id;
+                    productOption.textContent = product.node.title;
+                    materialInput.appendChild(productOption);
+                });
+                materialInput.addEventListener("change", function () {
+                    const selectedId = this.value;
+                    selectedMaterial = data.data.products.edges.find(product => product.node.id === selectedId)?.node || null;
+                    const variantSelector = document.getElementById("material-variant-input");
+                    variantSelector.innerHTML = "<option id='placeholder-material-variant-option' value='' disabled selected hidden>Select variant</option>"; // Clear previous options
+                    selectedMaterial.variants.edges.forEach(variant => {
+                        const variantOption = document.createElement("option");
+                        const variantImage = document.createElement("img");
+                        const variantText = document.createElement("span");
+                        variantImage.src = variant.node.image.url
+                        variantImage.alt = variant.node.title;
+                        variantOption.appendChild(variantImage);
+                        variantText.textContent = variant.node.title;
+                        variantOption.appendChild(variantText);
+                        variantOption.value = variant.node.id;
+                        // Store color hex in data-color attribute if available
+                        if (variant.node.metafield && variant.node.metafield.value) {
+                            variantOption.setAttribute('data-color', variant.node.metafield.value);
+                        }
+                        variantSelector.appendChild(variantOption);
+                    });
+                    if (selectedMaterial && selectedMaterial.variants.edges.length > 1) {
+                        document.querySelector("#material-variant-selector").classList.remove("hidden");
+                        variantSelector.required = true;
+                    } else {
+                        selectVariant(selectedMaterial.variants.edges[0]?.node.id);
+                        document.querySelector("#material-variant-selector").classList.add("hidden");
+                        variantSelector.required = false;
+                    }
+                });
+                document.querySelector("#material-variant-input").addEventListener("change", function () {
+                    const selectedVariantId = this.value;
+                    selectVariant(selectedVariantId);
+                });
+                function selectVariant(variantId) {
+                    selectedVariant = selectedMaterial.variants.edges.find(variant => variant.node.id === variantId)?.node || null;
+                    // Get color from the selected option's data-color attribute
+                    const variantSelector = document.getElementById("material-variant-input");
+                    const selectedOption = variantSelector.querySelector(`option[value='${variantId}']`);
+                    const colorHex = selectedOption ? selectedOption.dataset.color : null;
+                    const materialDisplay = document.querySelector("#material-display");
+                    materialDisplay.classList.add("info-hiding");
+                    if (colorHex) {
+                        materialDisplay.dataset.color = colorHex;
+                        changeColor(colorHex);
+                    }
+                    setTimeout(() => {
+                        document.querySelector("#material-info").innerHTML = `
+            <h2 id="material-name">${selectedMaterial.title}${selectedVariant.title === "Default Title" ? "" : `: ${selectedVariant.title}`}</h2>
+            <div>
+                <a href="${selectedMaterial.onlineStoreUrl}">View in store</a>
+                </div>
+                `;
+                        document.querySelector("#material-image-container").innerHTML = `
+            <img src="${selectedVariant.image.url}" alt="${selectedVariant.title}" id="material-image">
+            `;
+                        document.querySelector("#material-display").classList.add("info-revealing");
+                        document.querySelector("#material-display").classList.remove("info-hiding");
+                        setTimeout(() => {
+                            document.querySelector("#material-display").classList.remove("info-revealing");
+                        }, 700);
+                    }, 700);
+                }
+            });
+
+        document.querySelectorAll(".close-dialog").forEach(button => {
+            button.addEventListener("click", () => {
+                document.querySelector("dialog[open]").close();
+            });
+        });
+        document.querySelector("#infill-help").addEventListener("click", () => {
+            document.querySelector("#infill-dialog").showModal();
+        });
+        document.querySelector("#quality-help").addEventListener("click", () => {
+            document.querySelector("#quality-dialog").showModal();
+        });
+        document.querySelector("#nozzle-help").addEventListener("click", () => {
+            document.querySelector("#lod-dialog").showModal();
+        });
+        document.querySelector("#material-help").addEventListener("click", () => {
+            document.querySelector("#materials-dialog").showModal();
+        });
 
         // ui.modal.onclick = api.modal.hide;
         ui.modalBox.onclick = (ev) => { ev.stopPropagation() };
@@ -2100,7 +2299,7 @@ gapp.register("kiri.init", (root, exports) => {
     }
 
     // update static html elements with language overrides
-    ui.lang = function() {
+    ui.lang = function () {
         // lk attribute causes inner text to be replaced with lang value
         for (let el of [...DOC.querySelectorAll("[lk]")]) {
             let key = el.getAttribute('lk');
@@ -2108,7 +2307,7 @@ gapp.register("kiri.init", (root, exports) => {
             if (val) {
                 el.innerText = val;
             } else {
-                console.log({missing_ln: key});
+                console.log({ missing_ln: key });
             }
         }
         // lkt attribute causes a title attribute to be set from lang value
@@ -2118,7 +2317,7 @@ gapp.register("kiri.init", (root, exports) => {
             if (val) {
                 el.setAttribute("title", val);
             } else {
-                console.log({missing_ln: key});
+                console.log({ missing_ln: key });
             }
         }
     }
@@ -2133,16 +2332,16 @@ gapp.register("kiri.init", (root, exports) => {
             let map = kiri.lang.map(lang);
             let scr = DOC.createElement('script');
             // scr.setAttribute('defer',true);
-            scr.setAttribute('src',`/kiri/lang/${map}.js?${kiri.version}`);
+            scr.setAttribute('src', `/kiri/lang/${map}.js?${kiri.version}`);
             (DOC.body || DOC.head).appendChild(scr);
-            stats.set('ll',lang);
-            scr.onload = function() {
+            stats.set('ll', lang);
+            scr.onload = function () {
                 kiri.lang.set(map);
                 ui.lang();
                 init_one();
             };
-            scr.onerror = function(err) {
-                console.log({language_load_error: err, lang})
+            scr.onerror = function (err) {
+                console.log({ language_load_error: err, lang })
                 kiri.lang.set();
                 ui.lang();
                 init_one();
@@ -2157,7 +2356,7 @@ gapp.register("kiri.init", (root, exports) => {
     }
 
     // setup init() trigger when dom + scripts complete
-    DOC.onreadystatechange = function() {
+    DOC.onreadystatechange = function () {
         if (DOC.readyState === 'complete') {
             init_lang();
         }
