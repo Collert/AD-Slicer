@@ -29,6 +29,8 @@ RUN wget -O PrusaSlicer.AppImage "https://github.com/prusa3d/PrusaSlicer/release
 # Set workdir for app
 WORKDIR /app
 
+ENV PYTHONPATH="${PYTHONPATH}:/app/backend"
+
 # Copy backend
 COPY backend ./backend
 
