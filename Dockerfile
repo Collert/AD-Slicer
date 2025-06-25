@@ -6,7 +6,7 @@ COPY slicer ./slicer
 WORKDIR /app/slicer
 
 # Install dependencies and build
-RUN npm install && npm run build-web
+RUN npm install && node js/rollup.js kiri
 
 # Stage 2: Final image with FastAPI + built frontend + PrusaSlicer CLI
 FROM python:3.11-slim
@@ -35,7 +35,7 @@ ENV PYTHONPATH="${PYTHONPATH}:/app/backend"
 COPY backend ./backend
 
 # Copy frontend build from previous stage
-COPY --from=frontend-build /app/slicer/dist ./slicer/dist
+COPY --from=frontend-build /app/slicer/out/kiri ./slicer/dist
 
 # Copy requirements
 COPY requirements.txt .
