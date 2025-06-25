@@ -6,7 +6,7 @@ COPY slicer ./slicer
 WORKDIR /app/slicer
 
 # Install dependencies and build
-RUN npm install && npm run build
+RUN npm install && npm run build-web
 
 # Stage 2: Final image with FastAPI + built frontend + PrusaSlicer CLI
 FROM python:3.11-slim
