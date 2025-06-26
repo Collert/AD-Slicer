@@ -3,4 +3,6 @@ FROM node:20
 WORKDIR /app/slicer
 COPY . .
 
+RUN mkdir -p apps/grid && cp -r . apps/grid/
+
 RUN npm install
