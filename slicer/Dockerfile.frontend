@@ -1,12 +1,25 @@
 FROM node:20
 
 WORKDIR /app/slicer
-COPY . .
+# Copy only the necessary subfolders and files to avoid the symlink issue
+COPY apps apps
+COPY bin bin
+COPY conf conf
+COPY data data
+COPY docs docs
+COPY logs logs
+COPY mods mods
+COPY sample sample
+COPY src src
+COPY tmp tmp
+COPY web web
+COPY app-el.js app-el.js
+COPY app.js app.js
+COPY package.json package.json
+COPY package-lock.json package-lock.json
 
-# Remove symlink if it exists (and it's not a directory)
-RUN [ -L "apps/grid" ] && rm apps/grid || true
-
-# Recreate it as an actual directory with the contents
-RUN mkdir -p apps/grid && cp -r . apps/grid/
+# Now explicitly copy all that into apps/grid
+RUN mkdir -p apps/grid && \
+    cp -r bin conf data docs logs mods sample src tmp web app-el.js app.js package.json package-lock.json apps/grid/
 
 RUN npm install
