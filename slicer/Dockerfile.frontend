@@ -2,21 +2,21 @@ FROM node:20
 
 WORKDIR /app/slicer
 # Copy only the necessary subfolders and files to avoid the symlink issue
-COPY apps apps
-COPY bin bin
-COPY conf conf
-COPY data data
-COPY docs docs
-COPY logs logs
-COPY mods mods
-COPY sample sample
-COPY src src
-COPY tmp tmp
-COPY web web
-COPY app-el.js app-el.js
-COPY app.js app.js
-COPY package.json package.json
-COPY package-lock.json package-lock.json
+COPY slicer/apps apps
+COPY slicer/bin bin
+COPY slicer/conf conf
+COPY slicer/data data
+COPY slicer/docs docs
+COPY slicer/logs logs
+COPY slicer/mods mods
+COPY slicer/sample sample
+COPY slicer/src src
+COPY slicer/tmp tmp
+COPY slicer/web web
+COPY slicer/app-el.js app-el.js
+COPY slicer/app.js app.js
+COPY slicer/package.json package.json
+COPY slicer/package-lock.json package-lock.json
 
 # Now explicitly copy all that into apps/grid
 RUN mkdir -p apps/grid && \
