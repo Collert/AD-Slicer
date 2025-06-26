@@ -4,6 +4,3 @@ WORKDIR /app/slicer
 COPY . .
 
 RUN npm install
-
-EXPOSE 5173
-CMD ["npm", "run", "prod", "--", "--host", "0.0.0.0", "--port", "5173"]
