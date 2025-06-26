@@ -3,6 +3,10 @@ FROM node:20
 WORKDIR /app/slicer
 COPY . .
 
-RUN cp -r . apps/grid/
+# Remove symlink if it exists (and it's not a directory)
+RUN [ -L "apps/grid" ] && rm apps/grid || true
+
+# Recreate it as an actual directory with the contents
+RUN mkdir -p apps/grid && cp -r . apps/grid/
 
 RUN npm install
