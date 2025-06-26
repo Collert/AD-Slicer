@@ -11,9 +11,10 @@ COPY web web
 COPY app-el.js app-el.js
 COPY app.js app.js
 COPY package.json package.json
+COPY package-lock.json package-lock.json
 
 # Now explicitly copy all that into apps/grid
 RUN mkdir -p apps/grid && \
-    cp -r bin docs mods sample src web app-el.js app.js package.json apps/grid/
+    cp -r bin docs mods sample src web app-el.js app.js package.json package-lock.json apps/grid/
 
 RUN npm install
