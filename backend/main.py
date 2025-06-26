@@ -6,8 +6,8 @@ import os
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from helpers import get_shopify_price
-from slicer import slice_model 
+from .helpers import get_shopify_price
+from .slicer import slice_model 
 
 app = FastAPI(debug=True)
 
