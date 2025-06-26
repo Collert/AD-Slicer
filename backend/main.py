@@ -19,11 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve frontend
-if os.getenv("ENV") == "production":
-    frontend_dir = Path(__file__).resolve().parent.parent / "slicer" / "dist"
-    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
-
 @app.get("/api/ping")
 async def ping():
     return {"message": "pong"}
