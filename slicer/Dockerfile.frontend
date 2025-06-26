@@ -15,6 +15,6 @@ COPY package.json package.json
 
 # Now explicitly copy all that into apps/grid
 RUN mkdir -p apps/grid && \
-    cp -r bin conf data docs logs mods sample src tmp web app-el.js app.js package.json apps/grid/
+    cp -r bin docs mods sample src web app-el.js app.js package.json apps/grid/
 
 RUN npm install
