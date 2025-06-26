@@ -2,7 +2,6 @@ FROM node:20
 
 WORKDIR /app/slicer
 # Copy only the necessary subfolders and files to avoid the symlink issue
-COPY apps apps
 COPY bin bin
 COPY docs docs
 COPY mods mods
