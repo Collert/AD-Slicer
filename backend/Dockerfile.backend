@@ -13,7 +13,7 @@ RUN wget -O PrusaSlicer.AppImage "https://github.com/prusa3d/PrusaSlicer/release
     && ln -s /opt/squashfs-root/usr/bin/prusa-slicer /usr/local/bin/prusa-slicer
 
 # Backend setup
-WORKDIR /app/backend
+WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY backend ./backend
+COPY . .
