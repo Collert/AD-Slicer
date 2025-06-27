@@ -1,25 +1,20 @@
 FROM node:20
 
+# Set up working directory
 WORKDIR /app/slicer
-# Copy only the necessary subfolders and files to avoid the symlink issue
-COPY bin bin
-COPY docs docs
-COPY mods mods
-COPY sample sample
-COPY src src
-COPY web web
-COPY app-el.js app-el.js
-COPY app.js app.js
-COPY package.json package.json
-COPY package-lock.json package-lock.json
-COPY resolve-symlinks.sh resolve-symlinks.sh
 
-# Now explicitly copy all that into apps/grid
-RUN mkdir -p apps/grid && \
-    cp -r bin docs mods sample src web app-el.js app.js package.json package-lock.json apps/grid/
+# Copy entire slicer app including links.csv
+COPY . .
 
+# Install dependencies
 RUN npm install
 
-RUN chmod -x ./resolve-symlinks.sh
-
-RUN sudo ./resolve-symlinks.sh
+# Recreate symlinks based on links.csv
+RUN bash -c '\
+    while IFS=, read -r link target; do \
+    echo "Restoring $link -> $target"; \
+    rm -f "$link"; \
+    mkdir -p "$(dirname "$link")"; \
+    ln -s "$target" "$link"; \
+    done < links.csv \
+    '
