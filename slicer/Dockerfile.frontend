@@ -22,4 +22,4 @@ RUN npm install
 
 RUN chmod -x ./resolve-symlinks.sh
 
-RUN ./resolve-symlinks.sh
+RUN sudo ./resolve-symlinks.sh
