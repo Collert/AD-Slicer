@@ -2130,7 +2130,6 @@ gapp.register("kiri.init", (root, exports) => {
             space.view.home();
 
             // Send to backend
-            console.log("Sending quote request with form data:", formData);
             const response = await fetch("http://127.0.0.1:8282/api/get-quote", {
                 method: "POST",
                 headers: { Accept: "application/json" },
