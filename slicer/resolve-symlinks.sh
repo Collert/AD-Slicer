@@ -1,8 +1,6 @@
 #!/bin/bash
 echo "Resolving symlinks..."
 
-cd slicer || exit 1
-
 find . -type l | while read link; do
     target=$(readlink "$link")
 
