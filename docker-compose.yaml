@@ -11,7 +11,7 @@ services:
       - ./backend:/app
     working_dir: /app
     command: uvicorn main:app --host 0.0.0.0 --port 8282
-
+    restart: unless-stopped
 
   frontend:
     build:
@@ -21,3 +21,4 @@ services:
       - "5173:5173"
     working_dir: /app/slicer
     command: npm run dev -- --host 0.0.0.0 --port 5173
+    restart: unless-stopped
