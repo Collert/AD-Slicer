@@ -2132,7 +2132,7 @@ gapp.register("kiri.init", (root, exports) => {
             space.view.home();
 
             // Send to backend
-            const response = await fetch(`${devEnv ? "http://127.0.0.1:8282" : "https://slicer.adbits.ca"}/api/get-quote`, {
+            const response = await fetch(`${devEnv ? "http://127.0.0.1:8282" : "https://api.slicer.adbits.ca"}/api/get-quote`, {
                 method: "POST",
                 headers: { Accept: "application/json" },
                 body: formData
