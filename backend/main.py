@@ -13,7 +13,7 @@ app = FastAPI(debug=True)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://192.168.1.74:5173"],  # or ["*"] for all origins (not recommended for production)
+    allow_origins=["http://192.168.1.74:5173", "https://slicer.adbits.ca"],  # or ["*"] for all origins (not recommended for production)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
