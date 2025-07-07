@@ -2090,6 +2090,8 @@ gapp.register("kiri.init", (root, exports) => {
             );
         };
 
+        const devEnv = window.location.hostname === "192.168.1.74"
+
         function changeColor(hex) {
 
             api.selection.for_widgets(w => {
@@ -2130,7 +2132,7 @@ gapp.register("kiri.init", (root, exports) => {
             space.view.home();
 
             // Send to backend
-            const response = await fetch("http://127.0.0.1:8282/api/get-quote", {
+            const response = await fetch(`http://${devEnv ? "127.0.0.1:8282" : "slicer.adbits.ca"}/api/get-quote`, {
                 method: "POST",
                 headers: { Accept: "application/json" },
                 body: formData
