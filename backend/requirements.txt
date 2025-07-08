@@ -2,3 +2,6 @@ fastapi
 uvicorn[standard]
 python-multipart
 httpx
+shopifyapi
+cryptography
+python-dotenv

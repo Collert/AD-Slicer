@@ -565,6 +565,66 @@
                             </blockquote>
                         </div>
                 </dialog>
+                <dialog id="quote-dialog" class="my-dialog">
+                    <div>
+                        <nav>
+                            <h2>🧾 Quote</h2>
+                            <button class="close-dialog">
+                                <span class="material-symbols-outlined">
+                                    close
+                                </span>
+                            </button>
+                        </nav>
+                        <div class="quote-dialog">
+                            <div id="loading-quote">
+                                <img src="loading.gif" alt="Loading..." />
+                                <h3>Processing you model</h3>
+                            </div>
+                            <div id="quote-details" class="hidden">
+                                <div>
+                                    <span>Price:</span> <strong id="quote-price"></strong>
+                                </div>
+                                <div>
+                                    <span>Estimated weight:</span> <strong id="quote-weight"></strong>
+                                </div>
+                            </div>
+                            <div>Ready to print? Create an account <br> in a few clicks and order the model from your
+                                library.</div>
+                            <span id="complex-model-in-quote">
+                                Complex model detected. This may take a while to process. <br>
+                                We will hold the processing of your model until after manual review. <br>
+                                You will not be charged until we confirm your model as printable.
+                            </span>
+                            <button id="confirm-quote-button" class="hidden">Prepare to Print</button>
+                        </div>
+                    </div>
+                </dialog>
+                <dialog id="login" class="my-dialog">
+                    <div>
+                        <nav>
+                            <h2>Assign</h2>
+                            <button class="close-dialog">
+                                <span class="material-symbols-outlined">
+                                    close
+                                </span>
+                            </button>
+                        </nav>
+                        <div class="login-dialog">
+                            <p>Use your email to save the model.</p>
+                            <form id="login-form">
+                                <div class="input-group">
+                                    <label for="email">Email:</label>
+                                    <input type="email" id="email" name="email" required />
+                                </div>
+                                <div class="input-group">
+                                    <label for="model-name">Model name:</label>
+                                    <input type="text" id="model-name" name="model_name" required />
+                                </div>
+                                <button type="submit">Save & Go to cart</button>
+                            </form>
+                        </div>
+                    </div>
+                </dialog>
                 <form id="new-controls">
                     <h3>Print settings</h3>
                     <div class="form-container" id="quality-settings">
@@ -650,33 +710,6 @@
                 </form>
             </div>
 
-            <dialog id="quote-dialog" class="my-dialog">
-                <div>
-                    <nav>
-                        <h2>🧾 Quote</h2>
-                        <button class="close-dialog">
-                            <span class="material-symbols-outlined">
-                                close
-                            </span>
-                        </button>
-                    </nav>
-                    <div class="quote-dialog">
-                        <div id="loading-quote">
-                            <img src="loading.gif" alt="Loading..." />
-                            <h3>Processing you model</h3>
-                        </div>
-                        <div id="quote-details" class="hidden">
-                            <div>
-                                <span>Price:</span> <strong id="quote-price"></strong>
-                            </div>
-                            <div>
-                                <span>Estimated weight:</span> <strong id="quote-weight"></strong>
-                            </div>
-                        </div>
-                        <button id="confirm-quote-button" class="hidden">Confirm Quote</button>
-                    </div>
-                </div>
-            </dialog>
 
             <!-- main workspace -->
             <div id="mid-mid" class="grow">

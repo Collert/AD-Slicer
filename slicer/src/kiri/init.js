@@ -48,6 +48,7 @@ gapp.register("kiri.init", (root, exports) => {
     let complexModel = false;
 
     const complexModelWarningSign = document.querySelector('#complex-model-warning-sign');
+    const complexModelQuoteText = document.querySelector('#complex-model-in-quote');
 
     function settings() {
         return api.conf.get();
@@ -220,6 +221,7 @@ gapp.register("kiri.init", (root, exports) => {
                 }).join('');
             }
             complexModelWarningSign.style.display = complexModel ? 'grid' : 'none';
+            complexModelQuoteText.style.display = complexModel ? 'inline' : 'none';
         }, 100);
     }
 
@@ -2108,9 +2110,66 @@ gapp.register("kiri.init", (root, exports) => {
             getQuote(e);
         });
 
+        let finalFormData;
+        document.querySelector("#login-form").addEventListener("submit", async e => {
+            e.preventDefault();
+            const formData = finalFormData;
+
+            // Set view to home for consistent screenshot angle
+            space.view.home();
+
+            // Small delay to ensure rendering is complete
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Capture screenshot of the 3D view
+            console.log("Capturing screenshot...");
+            const screenshotDataUrl = space.screenshot();
+            const screenshotBlob = await fetch(screenshotDataUrl).then(r => r.blob());
+            console.log("Screenshot captured, size:", screenshotBlob.size, "bytes");
+
+            // Add screenshot to form data
+            formData.append("screenshot", screenshotBlob, "model-view.png");
+            formData.append("email", e.target.email.value);
+            formData.append("name", e.target.model_name.value);
+
+            const response = await fetch(`${devEnv ? "http://127.0.0.1:8282" : "https://api.slicer.adbits.ca"}/api/save-model`, {
+                method: "POST",
+                headers: { Accept: "application/json" },
+                body: formData
+            });
+
+            if (!response.ok) {
+                alert("Something went wrong. Please try again.");
+                return;
+            }
+
+            const data = await response.json();
+            window.location.href = `https://adbits.ca/pages/add-to-cart?variant=${data.variant_id.split('/').pop()}`;
+            console.log(data);
+        });
+
+        const finalDialog = document.querySelector("#login");
+
+        function resetDialogs() {
+            document.querySelector("dialog[open]").close();
+            resetQuoteDialog();
+        }
+
+        document.querySelector("#confirm-quote-button").addEventListener("click", () => {
+            resetDialogs();
+            finalDialog.showModal();
+        });
+
         async function getQuote(e) {
             const dialog = document.querySelector("#quote-dialog");
+            const isComplex = space.renderInfo().render.triangles > 1000000;
+            if (isComplex) {
+                dialog.querySelector(".quote-dialog").classList.add("complex");
+            } else {
+                dialog.querySelector(".quote-dialog").classList.remove("complex");
+            }
             dialog.showModal();
+
             // Export merged model as STL
             const stlData = selection.export("stl");
             const blob = new Blob([stlData], { type: "application/sla" });
@@ -2124,10 +2183,11 @@ gapp.register("kiri.init", (root, exports) => {
             formData.append("material", form.material.value); // adjust to match your form inputs
             formData.append("variant", form.variant.value); // adjust to match your form inputs
             formData.append("infill", form.infill.value);
-            formData.append("layerHeight", form.quality.value);
+            formData.append("layerHeight", form.quality.value || "0.2");
             formData.append("nozzleSize", form.nozzleSize.value || "0.4");
-            formData.append("quality", form.quality.value || "0.4");
-            formData.append("complex", space.renderInfo().render.triangles > 1000000 ? "high" : "low");
+            formData.append("complex", isComplex);
+
+            finalFormData = formData;
 
             space.view.home();
 
@@ -2138,6 +2198,12 @@ gapp.register("kiri.init", (root, exports) => {
                 body: formData
             });
 
+            if (response.status === 400) {
+                resetDialogs();
+                alert("Invalid model. Please ensure your model exists and try again.");
+                return;
+            }
+
             if (!response.ok) {
                 alert("Something went wrong. Please try again.");
                 return;
@@ -2147,8 +2213,22 @@ gapp.register("kiri.init", (root, exports) => {
 
             console.log(data);
 
-            // Display quote (replace this with your own UI logic)
+            finalFormData.append("price", data.price);
+            finalFormData.append("weight", data.grams);
+
+            console.log(finalFormData);
+
             dialog.querySelector(".quote-dialog").classList.add("done");
+
+            dialog.querySelector("#quote-price").textContent = `$${parseFloat(data.price).toFixed(2)}`;
+            dialog.querySelector("#quote-weight").textContent = `${data.grams} g`;
+        }
+
+        function resetQuoteDialog() {
+            const dialog = document.querySelector("#quote-dialog");
+            dialog.querySelector(".quote-dialog").classList.remove("done");
+            dialog.querySelector("#quote-price").textContent = "";
+            dialog.querySelector("#quote-weight").textContent = "";
         }
 
         let selectedMaterial = null;
@@ -2266,6 +2346,7 @@ gapp.register("kiri.init", (root, exports) => {
         document.querySelectorAll(".close-dialog").forEach(button => {
             button.addEventListener("click", () => {
                 document.querySelector("dialog[open]").close();
+                resetQuoteDialog();
             });
         });
         document.querySelector("#infill-help").addEventListener("click", () => {

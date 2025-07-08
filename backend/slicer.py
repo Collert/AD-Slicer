@@ -20,7 +20,8 @@ def slice_model(stl_path, infill_density=20, layer_height=0.2, nozzle_diameter=0
             "--support-material-extruder=0",
             "--support-material-interface-extruder=0",
             "--fill-pattern=gyroid",
-            f"--nozzle-diameter={nozzle_diameter}"
+            f"--nozzle-diameter={nozzle_diameter}",
+            f"--first-layer-height={layer_height}",
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
