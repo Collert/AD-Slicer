@@ -3,27 +3,39 @@ import os
 from dotenv import load_dotenv
 import re
 import uuid
-import re
-import uuid
+from pathlib import Path
 
 SHOPIFY_DOMAIN = "jvvkum-8d.myshopify.com"  # Replace with your shop domain
 
-load_dotenv()
+# Load environment variables from .env file in the same directory
+env_path = Path(__file__).parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
-SHOPIFY_TOKEN = os.getenv("SHOPIFY_TOKEN")  # Ensure this is set in your environment
-print(SHOPIFY_TOKEN)
+SHOPIFY_TOKEN = os.getenv("SHOPIFY_TOKEN")
+print(f"SHOPIFY_TOKEN loaded: {SHOPIFY_TOKEN is not None}")
+
+if not SHOPIFY_TOKEN:
+    raise ValueError("SHOPIFY_TOKEN environment variable is not set. Please check your .env file.")
 
 async def get_shopify_price(material_gid, variant_gid=None):
+    if not SHOPIFY_TOKEN:
+        raise ValueError("SHOPIFY_TOKEN is not available")
+        
     headers = {
         "X-Shopify-Access-Token": SHOPIFY_TOKEN,
         "Content-Type": "application/json",
         "Accept": "application/json"
     }
+    
+    print(f"Getting price for material_gid: {material_gid}, variant_gid: {variant_gid}")
+    
     # Extract numeric IDs from GIDs
     def extract_id(gid):
         return gid.split("/")[-1] if gid and gid.startswith("gid://shopify/") else None
     product_id = extract_id(material_gid)
     variant_id = extract_id(variant_gid) if variant_gid and variant_gid.startswith("gid://shopify/ProductVariant/") else None
+    
+    print(f"Extracted product_id: {product_id}, variant_id: {variant_id}")
 
     async with httpx.AsyncClient() as client:
         if variant_id:
