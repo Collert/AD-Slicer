@@ -11,7 +11,7 @@ def slice_model(stl_path, infill_density=20, layer_height=0.2, nozzle_diameter=0
             "prusa-slicer", "-g", stl_path,
             "--output", gcode_path,
             f"--layer-height={layer_height}",
-            f"--fill-density={infill_density}%",
+            f"--fill-density={min(infill_density, 99)}%",
             "--filament-diameter=1.75",
             f"--filament-density={filament_density}",
             "--support-material=1",
