@@ -2111,8 +2111,12 @@ gapp.register("kiri.init", (root, exports) => {
         });
 
         let finalFormData;
+        const finalSubmitButton = document.querySelector("#final-submit-button");
         document.querySelector("#login-form").addEventListener("submit", async e => {
             e.preventDefault();
+
+            finalSubmitButton.querySelector("span:last-child").textContent = "Working...";
+            finalSubmitButton.disabled = true;
             const formData = finalFormData;
 
             // Set view to home for consistent screenshot angle

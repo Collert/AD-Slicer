@@ -504,3 +504,43 @@ dialog::backdrop {
     font-weight: 600;
     text-align: center;
 }
+
+#final-submit-button {
+    align-items: center;
+}
+
+#final-submit-button:disabled {
+    background-color: var(--blue-2);
+    color: var(--dark-menu-text);
+    cursor: not-allowed;
+    gap: 1rem;
+    transition: all 300ms ease;
+}
+
+#final-submit-button span:first-child {
+    display: grid;
+    width: 0rem;
+    opacity: 0;
+    aspect-ratio: 1;
+    background-color: transparent;
+    border: 3px solid var(--blue-5);
+    border-radius: 50%;
+    clip-path: inset(50% 0 0 0);
+    transition: width 300ms ease;
+    animation: see-saw ease-in-out 1s infinite alternate;
+}
+
+#final-submit-button:disabled span:first-child {
+    width: 1rem;
+    opacity: 1;
+}
+
+@keyframes see-saw {
+    from {
+        transform: rotate(45deg);
+    }
+
+    to {
+        transform: rotate(-45deg);
+    }
+}
