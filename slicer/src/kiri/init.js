@@ -2045,6 +2045,7 @@ gapp.register("kiri.init", (root, exports) => {
         $('file-new').onclick = (ev) => { ev.stopPropagation(); workspaceNew() };
         $('file-recent').onclick = () => { api.modal.show('files') };
         $('file-import').onclick = (ev) => { api.event.import(ev); };
+        $('add-file-button').onclick = (ev) => { api.event.import(ev); };
         ui.func.slice.onclick = (ev) => { ev.stopPropagation(); api.function.slice() };
         ui.func.preview.onclick = (ev) => { ev.stopPropagation(); api.function.print() };
         ui.func.animate.onclick = (ev) => { ev.stopPropagation(); api.function.animate() };
@@ -2108,6 +2109,10 @@ gapp.register("kiri.init", (root, exports) => {
             platform.select_all();
             selection.merge();
             getQuote(e);
+        });
+
+        document.querySelector("#controls-toggle-button").addEventListener("click", e => {
+            document.querySelector("#new-controls").classList.toggle("open");
         });
 
         let finalFormData;

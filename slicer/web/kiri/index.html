@@ -68,17 +68,18 @@
                 </span>
             </div>
             <div class="grow">
-                <a href="https://adbits.ca/products/custom-3d-modeling-engineering-parts"><span
+                <a class="request-link" href="https://adbits.ca/products/custom-3d-modeling-engineering-parts"><span
                         class="material-symbols-outlined">design_services</span>
                     <span>Request part design</span></a>
-                <a href="/mesh"><span class="material-symbols-outlined">
+                <a class="request-link" href="/mesh"><span class="material-symbols-outlined">
                         architecture
                     </span>
                     <span>Design a model</span></a>
             </div>
             <div id="app-name" class="f-col a-center top-menu">
                 <span class="grow">
-                    <span id="app-name-text" class="km-font">AD-Slicer
+                    <span id="app-name-text" class="km-font">
+                        <span>AD-Slicer</span>
                         <span>Powered by Kiri:Moto</span>
                     </span>
                     <div id="app-name-pop" class="top-menu-drop top-menu-center">
@@ -627,87 +628,115 @@
                     </div>
                 </dialog>
                 <form id="new-controls">
-                    <h3>Print settings</h3>
-                    <div class="form-container" id="quality-settings">
-                        <div>
-                            <label for="quality-input">Quality preset</label>
-                            <abbr id="quality-help" class="help-button" title="What is this?"><span
-                                    class="material-symbols-outlined">
-                                    help
-                                </span></abbr>
+                    <div>
+
+                        <div id="control-form-content">
+                            <h3>Print settings</h3>
+                            <div class="form-container" id="quality-settings">
+                                <div>
+                                    <label for="quality-input">Quality preset</label>
+                                    <abbr id="quality-help" class="help-button" title="What is this?"><span
+                                            class="material-symbols-outlined">
+                                            help
+                                        </span></abbr>
+                                </div>
+                                <select required name="quality" id="quality-input">
+                                    <option value="0.2" selected>Standard</option>
+                                    <option value="0.08">High</option>
+                                </select>
+                            </div>
+                            <div class="form-container" id="nozzle-settings">
+                                <div>
+                                    <label for="nozzle-input">Level of detail</label>
+                                    <abbr id="nozzle-help" class="help-button" title="What to pick?"><span
+                                            class="material-symbols-outlined">
+                                            help
+                                        </span></abbr>
+                                </div>
+                                <select required name="nozzleSize" id="nozzle-input">
+                                    <option value="0.8">Rugged</option>
+                                    <option value="0.6">Standard</option>
+                                    <option value="0.4" selected>High</option>
+                                    <option value="0.2">Extreme</option>
+                                </select>
+                            </div>
+                            <div class="form-container" id="infill-percent-settings">
+                                <div>
+                                    <label for="infill-percent-input">Infill</label>
+                                    <abbr id="infill-help" class="help-button" title="What is infil?"><span
+                                            class="material-symbols-outlined">
+                                            help
+                                        </span></abbr>
+                                </div>
+                                <div class="input-percent-wrapper">
+                                    <input required name="infill" id="infill-percent-input" value="15" type="number"
+                                        min="0" max="100" />
+                                </div>
+                            </div>
+                            <div class="form-container" id="material-selector">
+                                <div>
+                                    <label for="material-input">Material</label>
+                                    <abbr id="material-help" class="help-button" title="What material to choose"><span
+                                            class="material-symbols-outlined">
+                                            help
+                                        </span></abbr>
+                                </div>
+                                <select required name="material" id="material-input">
+                                    <option id="placeholder-material-option" value="" disabled selected hidden>Select
+                                        material
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-container hidden" id="material-variant-selector">
+                                <div>
+                                    <label for="material-variant-input">Variant</label>
+                                </div>
+                                <select required name="variant" id="material-variant-input">
+                                    <option id="placeholder-material-variant-option" value="" disabled selected hidden>
+                                        Select
+                                        variant
+                                    </option>
+                                </select>
+                            </div>
+                            <small>
+                                Note: The color shown here is a digital preview and may not exactly match the actual
+                                material
+                                color. For the most accurate representation, please view the material images by clicking
+                                below.
+                            </small>
+                            <div class="form-container hidden" id="material-display">
+                                <div id="material-image-container">
+                                    <span class="material-symbols-outlined">
+                                        polymer
+                                    </span>
+                                </div>
+                                <div id="material-info">
+                                    <a id="browse-materials-link"
+                                        href="https://adbits.ca/collections/custom-prints">Browse
+                                        materials</a>
+                                </div>
+                            </div>
                         </div>
-                        <select required name="quality" id="quality-input">
-                            <option value="0.2" selected>Standard</option>
-                            <option value="0.08">High</option>
-                        </select>
                     </div>
-                    <div class="form-container" id="nozzle-settings">
-                        <div>
-                            <label for="nozzle-input">Level of detail</label>
-                            <abbr id="nozzle-help" class="help-button" title="What to pick?"><span
-                                    class="material-symbols-outlined">
-                                    help
-                                </span></abbr>
-                        </div>
-                        <select required name="nozzleSize" id="nozzle-input">
-                            <option value="0.8">Rugged</option>
-                            <option value="0.6">Standard</option>
-                            <option value="0.4" selected>High</option>
-                            <option value="0.2">Extreme</option>
-                        </select>
-                    </div>
-                    <div class="form-container" id="infill-percent-settings">
-                        <div>
-                            <label for="infill-percent-input">Infill</label>
-                            <abbr id="infill-help" class="help-button" title="What is infil?"><span
-                                    class="material-symbols-outlined">
-                                    help
-                                </span></abbr>
-                        </div>
-                        <div class="input-percent-wrapper">
-                            <input required name="infill" id="infill-percent-input" value="15" type="number" min="0"
-                                max="100" />
-                        </div>
-                    </div>
-                    <div class="form-container" id="material-selector">
-                        <div>
-                            <label for="material-input">Material</label>
-                            <abbr id="material-help" class="help-button" title="What material to choose"><span
-                                    class="material-symbols-outlined">
-                                    help
-                                </span></abbr>
-                        </div>
-                        <select required name="material" id="material-input">
-                            <option id="placeholder-material-option" value="" disabled selected hidden>Select material
-                            </option>
-                        </select>
-                    </div>
-                    <div class="form-container hidden" id="material-variant-selector">
-                        <div>
-                            <label for="material-variant-input">Variant</label>
-                        </div>
-                        <select required name="variant" id="material-variant-input">
-                            <option id="placeholder-material-variant-option" value="" disabled selected hidden>Select
-                                variant
-                            </option>
-                        </select>
-                    </div>
-                    <small>
-                        Note: The color shown here is a digital preview and may not exactly match the actual material
-                        color. For the most accurate representation, please view the material images by clicking below.
-                    </small>
-                    <div class="form-container hidden" id="material-display">
-                        <div id="material-image-container">
-                            <span class="material-symbols-outlined">
-                                polymer
+                    <div id="controls-buttons">
+                        <button id="get-quote-button">Get quote</button>
+                        <button type="button" id="controls-toggle-button">
+                            <div>
+                                <span class="material-symbols-outlined">
+                                    collapse_all
+                                </span>
+                                <span class="material-symbols-outlined">
+                                    expand_all
+                                </span>
+                            </div>
+                            <span>
+                                Menu
                             </span>
-                        </div>
-                        <div id="material-info">
-                            <a id="browse-materials-link" href="https://adbits.ca/collections/custom-prints">Browse
-                                materials</a>
-                        </div>
+                        </button>
+                        <button id="add-file-button" type="button"><span class="material-symbols-outlined">
+                                add_2
+                            </span></button>
                     </div>
-                    <button id="get-quote-button">Get quote</button>
                 </form>
             </div>
 
