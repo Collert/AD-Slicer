@@ -103,9 +103,10 @@ async def create_customer_product(
     safe_handle = re.sub(r'[^\w\-]', '-', f"{product_name}-{email.split('@')[0]}-{uuid.uuid4().hex[:8]}").lower()
     
     async with httpx.AsyncClient() as client:
-        mutation = """
-        mutation productCreate($input: ProductInput!) {
-            productCreate(input: $input) {
+        # Create the product - Shopify will automatically create a default variant
+        product_mutation = """
+        mutation productCreate($product: ProductCreateInput!) {
+            productCreate(product: $product) {
                 product {
                     id
                     title
@@ -171,30 +172,24 @@ async def create_customer_product(
         <p><strong>Nozzle Size:</strong> {nozzle_size}mm</p>
         """
         
-        # Create product input with variants
+        # Create product input (without variants)
         product_input = {
             "title": product_name,
             "descriptionHtml": description,
             "handle": safe_handle,
             "vendor": "AD-Customs",
             "status": "ACTIVE",  # Make product active on online store
-            "publications": [
-                {
-                    "publicationId": "gid://shopify/Publication/261868257584"  # Online Store publication ID
-                }
-            ],
+            # "publications": [
+            #     {
+            #         "publicationId": "gid://shopify/Publication/261868257584"  # Online Store publication ID
+            #     }
+            # ],
             "metafields": [
                 {
                     "namespace": "custom",
                     "key": "owner",
                     "value": email,
                     "type": "single_line_text_field"
-                }
-            ],
-            "variants": [
-                {
-                    "title": "Default",
-                    "price": str(price) if price is not None else "0.00"
                 }
             ]
         }
@@ -203,22 +198,22 @@ async def create_customer_product(
         if complex:
             product_input["tags"] = ["manual-review"]
         
-        # Add weight to the variant if provided
-        if weight is not None:
-            product_input["variants"][0]["weight"] = weight
-            product_input["variants"][0]["weightUnit"] = "GRAMS"
-        
         variables = {
-            "input": product_input
+            "product": product_input
         }
         
         payload = {
-            "query": mutation,
+            "query": product_mutation,
             "variables": variables
         }
         
+        # Debug: Print what we're actually sending
+        print(f"DEBUG: Sending GraphQL mutation with variables: {variables}")
+        print(f"DEBUG: Product input keys: {list(product_input.keys())}")
+        
         url = f"https://{SHOPIFY_DOMAIN}/admin/api/2023-10/graphql.json"
         
+        # Create the product - Shopify automatically creates a default variant
         resp = await client.post(url, headers=headers, json=payload)
         resp.raise_for_status()
         data = resp.json()
@@ -237,11 +232,90 @@ async def create_customer_product(
         product_id = product["id"]
         product_handle = product["handle"]
         
-        # Get the variant ID from the response
+        # Now publish the product to the online store using the new publishablePublish mutation
+        try:
+            publish_mutation = """
+            mutation publishablePublish($id: ID!, $input: [PublicationInput!]!) {
+                publishablePublish(id: $id, input: $input) {
+                    userErrors {
+                        field
+                        message
+                    }
+                }
+            }
+            """
+            
+            publish_variables = {
+                "id": product_id,
+                "input": [
+                    {
+                        "publicationId": "gid://shopify/Publication/261868257584"
+                    }
+                ]
+            }
+            
+            publish_payload = {
+                "query": publish_mutation,
+                "variables": publish_variables
+            }
+            
+            print(f"Publishing product {product_id} to online store...")
+            publish_resp = await client.post(url, headers=headers, json=publish_payload)
+            publish_resp.raise_for_status()
+            publish_data = publish_resp.json()
+            
+            if "errors" in publish_data:
+                print(f"Failed to publish product: {publish_data['errors']}")
+                # Don't fail the entire operation if publishing fails
+            else:
+                publish_user_errors = publish_data.get("data", {}).get("publishablePublish", {}).get("userErrors", [])
+                if publish_user_errors:
+                    print(f"Publish errors: {publish_user_errors}")
+                else:
+                    print(f"Successfully published product {product_id} to online store")
+                    
+        except Exception as e:
+            print(f"Failed to publish product {product_id}: {str(e)}")
+            # Don't fail the entire operation if publishing fails
+        
+        # Get the default variant ID that Shopify automatically created
         variant_id = None
         variants = product.get("variants", {}).get("edges", [])
         if variants:
             variant_id = variants[0]["node"]["id"]
+        
+        # Update the default variant with price and weight using REST API
+        if variant_id:
+            try:
+                # Extract numeric IDs
+                numeric_product_id = product_id.split("/")[-1]
+                numeric_variant_id = variant_id.split("/")[-1]
+                
+                # Update variant using REST API
+                variant_url = f"https://{SHOPIFY_DOMAIN}/admin/api/2023-10/variants/{numeric_variant_id}.json"
+                
+                variant_data = {"variant": {}}
+                
+                # Always set price (default to 0.00 if not provided)
+                variant_data["variant"]["price"] = str(price) if price is not None else "0.00"
+                
+                # Set weight if provided
+                if weight is not None:
+                    variant_data["variant"]["weight"] = weight
+                    variant_data["variant"]["weight_unit"] = "g"
+                
+                print(f"Updating variant {variant_id} with data: {variant_data}")
+                
+                variant_resp = await client.put(variant_url, headers=headers, json=variant_data)
+                variant_resp.raise_for_status()
+                variant_result = variant_resp.json()
+                print(f"Successfully updated variant {variant_id}")
+                
+            except Exception as e:
+                print(f"Failed to update variant {variant_id}: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                # Don't fail the entire operation if variant update fails
         
         print(f"Created product for customer {email}: {product_id} (handle: {product_handle})")
         

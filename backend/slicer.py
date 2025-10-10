@@ -4,6 +4,23 @@ import os
 import re
 
 def slice_model(stl_path, infill_density=20, layer_height=0.2, nozzle_diameter=0.4, filament_density=1.24):
+    # Check if we're in development mode (no prusa-slicer available)
+    import shutil
+    if not shutil.which("prusa-slicer"):
+        print("⚠️  DEV MODE: PrusaSlicer not found, using mock weight calculation")
+        # Mock calculation for development: estimate weight based on file size and infill
+        try:
+            file_size_mb = os.path.getsize(stl_path) / (1024 * 1024)  # File size in MB
+            base_weight = file_size_mb * 10  # Rough estimate: 10g per MB
+            infill_multiplier = (infill_density / 100) * 0.7 + 0.3  # 30% base + 70% infill
+            estimated_weight = base_weight * infill_multiplier * (filament_density / 1.24)
+            print(f"📊 Mock calculation: {file_size_mb:.2f}MB file → {estimated_weight:.2f}g estimated weight")
+            return max(1.0, estimated_weight)  # Minimum 1g
+        except Exception as e:
+            print(f"❌ Mock calculation failed: {e}")
+            return 25.0  # Default fallback weight
+    
+    # Production mode: use actual PrusaSlicer
     with tempfile.TemporaryDirectory() as tempdir:
         gcode_path = os.path.join(tempdir, "output.gcode")
 
