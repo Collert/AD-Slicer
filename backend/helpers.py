@@ -178,7 +178,7 @@ async def create_customer_product(
             "descriptionHtml": description,
             "handle": safe_handle,
             "vendor": "AD-Customs",
-            "status": "ACTIVE",  # Make product active on online store
+            "status": "UNLISTED",  # Make product active on online store
             # "publications": [
             #     {
             #         "publicationId": "gid://shopify/Publication/261868257584"  # Online Store publication ID
@@ -297,7 +297,7 @@ async def create_customer_product(
                 variant_data = {"variant": {}}
                 
                 # Always set price (default to 0.00 if not provided)
-                variant_data["variant"]["price"] = str(price) if price is not None else "0.00"
+                variant_data["variant"]["price"] = str(price + 1) if price is not None else "0.00"
                 
                 # Set weight if provided
                 if weight is not None:
