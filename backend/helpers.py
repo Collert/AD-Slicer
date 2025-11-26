@@ -211,7 +211,7 @@ async def create_customer_product(
         print(f"DEBUG: Sending GraphQL mutation with variables: {variables}")
         print(f"DEBUG: Product input keys: {list(product_input.keys())}")
         
-        url = f"https://{SHOPIFY_DOMAIN}/admin/api/2023-10/graphql.json"
+        url = f"https://{SHOPIFY_DOMAIN}/admin/api/2025-10/graphql.json"
         
         # Create the product - Shopify automatically creates a default variant
         resp = await client.post(url, headers=headers, json=payload)
