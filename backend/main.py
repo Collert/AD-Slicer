@@ -122,10 +122,17 @@ async def save_model(
     if not safe_name:
         safe_name = uuid.uuid4().hex[:8]  # Generate a random name if empty
     
+    # Create email-based folder (sanitize email for filesystem safety)
+    safe_email = re.sub(r'[^\w\-_\.\@]', '_', email.strip())
+    email_folder = UPLOADS_DIR / safe_email
+    email_folder.mkdir(exist_ok=True)
+    
     # Get file extension from uploaded file
     file_extension = Path(file.filename).suffix if file.filename else ".stl"
-    safe_filename = f"{safe_name}{file_extension}"
-    stl_path = UPLOADS_DIR / safe_filename
+    # Add random string suffix to avoid overwriting existing files
+    random_suffix = uuid.uuid4().hex[:8]
+    safe_filename = f"{safe_name}_{random_suffix}{file_extension}"
+    stl_path = email_folder / safe_filename
 
     # Save uploaded file to persistent storage
     with open(stl_path, "wb") as f:
