@@ -123,7 +123,7 @@ async def save_model(
         safe_name = uuid.uuid4().hex[:8]  # Generate a random name if empty
     
     # Create email-based folder (sanitize email for filesystem safety)
-    safe_email = re.sub(r'[^\w\-_\.\@]', '_', email.strip())
+    safe_email = re.sub(r'[^\w\-_\.]', '_', email.strip().replace('@', '_at_'))
     email_folder = UPLOADS_DIR / safe_email
     email_folder.mkdir(exist_ok=True)
     
