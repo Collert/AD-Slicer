@@ -45,6 +45,10 @@ gapp.register("kiri.init", (root, exports) => {
     // copy version from grid app
     kiri.version = gapp.version;
 
+    // Loading timeout configuration (in milliseconds)
+    // Timeout for detecting infinite loading loops caused by corrupted models
+    const LOADING_TIMEOUT_MS = 30000; // 30 seconds
+
     let complexModel = false;
 
     const complexModelWarningSign = document.querySelector('#complex-model-warning-sign');
@@ -837,7 +841,8 @@ gapp.register("kiri.init", (root, exports) => {
                 });
             } else {
                 // Fallback for browsers that don't support databases()
-                // Try to delete known database names
+                // Try to delete known database names used by the application
+                // Note: Update this list if new IndexedDB databases are added to the app
                 const knownDbs = ['ws-state', 'ws-cache'];
                 knownDbs.forEach(dbName => {
                     try {
@@ -869,7 +874,6 @@ gapp.register("kiri.init", (root, exports) => {
             { newSelect, newLabel, newValue, newRow, newGCode, newDiv } = uc;
 
         // Start loading timeout to detect infinite loading loop
-        const LOADING_TIMEOUT_MS = 30000; // 30 seconds
         let loadingTimeoutId = setTimeout(() => {
             showLoadingTimeoutDialog();
         }, LOADING_TIMEOUT_MS);
