@@ -39,19 +39,17 @@
     <div id="app" class="f-col">
         <!-- hide page contents and provide loading message during initialization -->
         <div id="curtain" class="j-center a-center">
-            <div id="loading-content" class="f-col a-center">
-                <img id="loading">AD-Slicer is Loading
-            </div>
-            <div id="loading-timeout-dialog" style="display: none;" class="f-col a-center">
-                <div class="loading-timeout-message">
-                    <h3>Loading is Taking Longer Than Expected</h3>
-                    <p>The slicer may have crashed while loading a complex model.</p>
-                    <p>This can happen when a saved model in your browser storage is too complex or corrupted.</p>
-                    <button id="clear-site-data-btn" class="btn-primary">
-                        Clear Site Data & Refresh
-                    </button>
-                    <p class="warning-note">Note: This will clear all saved models and settings from your browser.</p>
-                </div>
+            <img id="loading">
+            <div class="loading-message">AD-Slicer is Loading</div>
+            <div id="loading-tip"></div>
+        </div>
+        <div id="loading-timeout-dialog" style="display:none;">
+            <div class="loading-timeout-message">
+                <h3>Loading Timeout</h3>
+                <p>The application is taking longer than expected to load.</p>
+                <p>You can try clearing site data to resolve potential issues.</p>
+                <button id="clear-site-data-btn">Clear Site Data</button>
+                <p class="warning-note">Note: This will remove all stored data for this site.</p>
             </div>
         </div>
 

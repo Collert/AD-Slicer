@@ -54,6 +54,73 @@ gapp.register("kiri.init", (root, exports) => {
     const complexModelWarningSign = document.querySelector('#complex-model-warning-sign');
     const complexModelQuoteText = document.querySelector('#complex-model-in-quote');
 
+    // Loading screen tips for 3D printing
+    const loadingTips = [
+        "PLA is eco-friendly and great for decorative items, but not ideal for high-heat applications",
+        "ABS is more durable and heat-resistant than PLA, perfect for functional parts",
+        "PETG combines the ease of PLA with the strength of ABS - a great all-around material",
+        "Higher layer resolution means finer details but longer print times and higher costs",
+        "Lower layer resolution is perfect for large, functional parts where speed matters",
+        "Resin (SLA) prints offer exceptional detail and smooth surfaces compared to filament printing",
+        "SLA prints are ideal for miniatures, jewelry, and dental models due to their precision",
+        "Resin prints require post-processing: washing and UV curing to achieve final strength",
+        "Wall thickness affects durability: thicker walls mean stronger parts",
+        "Infill percentage determines internal density - higher infill means stronger but heavier parts",
+        "TPU and flexible filaments are great for phone cases, grips, and anything that needs to bend",
+        "Nylon is extremely strong and durable, ideal for mechanical parts and gears",
+        "Print orientation affects both strength and appearance - parts are weakest between layers",
+        "Support structures may leave marks; consider orientation to minimize supports on visible surfaces",
+        "Transparent or translucent materials work best with resin printing for clarity",
+        "Wood-filled filaments create a natural wood appearance and texture",
+        "Metal-filled filaments add weight and a metallic finish to your prints",
+        "Carbon fiber filaments offer exceptional strength-to-weight ratio for demanding applications",
+        "Smooth surfaces require higher resolution; textured finishes hide layer lines well",
+        "Small details under 1mm may not print well in FDM; consider SLA for fine features",
+        "Overhangs beyond 45 degrees typically need supports - design with this in mind",
+        "Threads and screw holes print best when designed slightly larger than nominal size",
+        "Living hinges work well in flexible materials but require specific design considerations",
+        "Post-processing options include sanding, painting, vapor smoothing, or epoxy coating",
+        "Colors may vary slightly from screen to final print; request samples for critical matches",
+        "UV-resistant materials are recommended for outdoor applications to prevent degradation",
+        "Food-safe printing requires special materials, nozzles, and post-processing - consult requirements",
+        "Larger prints take exponentially longer; consider splitting large models into parts",
+        "Hollow designs save material and cost but may need drain holes for resin prints",
+        "Layer lines can be minimized with higher resolution or smoothed through post-processing"
+    ];
+
+    let tipRotationInterval = null;
+    let currentTipIndex = 0;
+
+    function startLoadingTips() {
+        const tipElement = DOC.getElementById('loading-tip');
+        if (!tipElement || !loadingTips || loadingTips.length === 0) return;
+
+        // If already running, stop previous interval to prevent multiple intervals
+        if (tipRotationInterval) {
+            clearInterval(tipRotationInterval);
+            tipRotationInterval = null;
+        }
+
+        // Reset tip index
+        currentTipIndex = 0;
+
+        // Show first tip immediately
+        tipElement.textContent = loadingTips[currentTipIndex];
+
+        // Rotate tips every 4 seconds
+        tipRotationInterval = setInterval(() => {
+            currentTipIndex = (currentTipIndex + 1) % loadingTips.length;
+            tipElement.textContent = loadingTips[currentTipIndex];
+        }, 4000);
+    }
+
+    function stopLoadingTips() {
+        if (tipRotationInterval) {
+            clearInterval(tipRotationInterval);
+            tipRotationInterval = null;
+        }
+    }
+
     function settings() {
         return api.conf.get();
     }
@@ -801,14 +868,14 @@ gapp.register("kiri.init", (root, exports) => {
     function showLoadingTimeoutDialog() {
         const loadingContent = $('loading-content');
         const timeoutDialog = $('loading-timeout-dialog');
-        
+
         if (loadingContent) {
             loadingContent.style.display = 'none';
         }
         if (timeoutDialog) {
             timeoutDialog.style.display = 'flex';
         }
-        
+
         // Bind the clear site data button
         const clearBtn = $('clear-site-data-btn');
         if (clearBtn) {
@@ -821,7 +888,7 @@ gapp.register("kiri.init", (root, exports) => {
         try {
             // Clear localStorage
             localStorage.clear();
-            
+
             // Clear all IndexedDB databases
             if (self.indexedDB && self.indexedDB.databases) {
                 // Modern browsers support databases() method
@@ -851,7 +918,7 @@ gapp.register("kiri.init", (root, exports) => {
                         console.log('Error deleting database:', dbName, e);
                     }
                 });
-                
+
                 // Refresh the page after clearing
                 setTimeout(() => {
                     location.reload(true);
@@ -873,13 +940,16 @@ gapp.register("kiri.init", (root, exports) => {
             { newBlank, newButton, newBoolean, newGroup, newInput } = uc,
             { newSelect, newLabel, newValue, newRow, newGCode, newDiv } = uc;
 
+        // Start loading tips rotation
+        startLoadingTips();
+
         // Start loading timeout to detect infinite loading loop
         let loadingTimeoutId = setTimeout(() => {
             showLoadingTimeoutDialog();
         }, LOADING_TIMEOUT_MS);
 
         // Function to clear the loading timeout when loading completes successfully
-        api.clearLoadingTimeout = function() {
+        api.clearLoadingTimeout = function () {
             if (loadingTimeoutId) {
                 clearTimeout(loadingTimeoutId);
                 loadingTimeoutId = null;
@@ -2108,6 +2178,7 @@ gapp.register("kiri.init", (root, exports) => {
 
         // lift curtain and clear loading timeout
         api.clearLoadingTimeout();
+        stopLoadingTips();
         $('curtain').style.display = 'none';
 
         // bind interface action elements
