@@ -89,7 +89,16 @@ gapp.register("kiri.init", (root, exports) => {
 
     function startLoadingTips() {
         const tipElement = DOC.getElementById('loading-tip');
-        if (!tipElement) return;
+        if (!tipElement || !loadingTips || loadingTips.length === 0) return;
+
+        // If already running, stop previous interval to prevent multiple intervals
+        if (tipRotationInterval) {
+            clearInterval(tipRotationInterval);
+            tipRotationInterval = null;
+        }
+
+        // Reset tip index
+        currentTipIndex = 0;
 
         // Show first tip immediately
         tipElement.textContent = loadingTips[currentTipIndex];
