@@ -47,7 +47,7 @@ gapp.register("kiri.init", (root, exports) => {
 
     // Loading timeout configuration (in milliseconds)
     // Timeout for detecting infinite loading loops caused by corrupted models
-    const LOADING_TIMEOUT_MS = 30000; // 30 seconds
+    const LOADING_TIMEOUT_MS = 20000; // 20 seconds
 
     let complexModel = false;
 
