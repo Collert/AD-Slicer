@@ -814,6 +814,52 @@ details[open] summary::after {
     z-index: 1000;
 }
 
+#loading-timeout-dialog {
+    max-width: 500px;
+    padding: 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.loading-timeout-message {
+    text-align: center;
+}
+
+.loading-timeout-message h3 {
+    margin: 0 0 20px 0;
+    color: #d32f2f;
+    font-size: 24px;
+}
+
+.loading-timeout-message p {
+    margin: 10px 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+#clear-site-data-btn {
+    margin: 20px 0 10px 0;
+    padding: 12px 24px;
+    font-size: 16px;
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#clear-site-data-btn:hover {
+    background-color: #b71c1c;
+}
+
+.warning-note {
+    font-size: 12px !important;
+    color: #666;
+    font-style: italic;
+}
+
 #tracker {
     top: 0;
     left: 0;
