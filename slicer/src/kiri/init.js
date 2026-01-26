@@ -45,6 +45,10 @@ gapp.register("kiri.init", (root, exports) => {
     // copy version from grid app
     kiri.version = gapp.version;
 
+    // Loading timeout configuration (in milliseconds)
+    // Timeout for detecting infinite loading loops caused by corrupted models
+    const LOADING_TIMEOUT_MS = 20000; // 20 seconds
+
     let complexModel = false;
 
     const complexModelWarningSign = document.querySelector('#complex-model-warning-sign');
@@ -793,12 +797,94 @@ gapp.register("kiri.init", (root, exports) => {
         return !isBelt();
     }
 
+    // Show timeout dialog when loading takes too long
+    function showLoadingTimeoutDialog() {
+        const loadingContent = $('loading-content');
+        const timeoutDialog = $('loading-timeout-dialog');
+        
+        if (loadingContent) {
+            loadingContent.style.display = 'none';
+        }
+        if (timeoutDialog) {
+            timeoutDialog.style.display = 'flex';
+        }
+        
+        // Bind the clear site data button
+        const clearBtn = $('clear-site-data-btn');
+        if (clearBtn) {
+            clearBtn.onclick = clearSiteDataAndRefresh;
+        }
+    }
+
+    // Clear all site data (IndexedDB and localStorage) and refresh the page
+    function clearSiteDataAndRefresh() {
+        try {
+            // Clear localStorage
+            localStorage.clear();
+            
+            // Clear all IndexedDB databases
+            if (self.indexedDB && self.indexedDB.databases) {
+                // Modern browsers support databases() method
+                self.indexedDB.databases().then(databases => {
+                    databases.forEach(db => {
+                        if (db.name) {
+                            self.indexedDB.deleteDatabase(db.name);
+                        }
+                    });
+                }).catch(err => {
+                    console.log('Error clearing databases:', err);
+                }).finally(() => {
+                    // Refresh the page after clearing
+                    setTimeout(() => {
+                        location.reload(true);
+                    }, 500);
+                });
+            } else {
+                // Fallback for browsers that don't support databases()
+                // Try to delete known database names used by the application
+                // Note: Update this list if new IndexedDB databases are added to the app
+                const knownDbs = ['ws-state', 'ws-cache'];
+                knownDbs.forEach(dbName => {
+                    try {
+                        self.indexedDB.deleteDatabase(dbName);
+                    } catch (e) {
+                        console.log('Error deleting database:', dbName, e);
+                    }
+                });
+                
+                // Refresh the page after clearing
+                setTimeout(() => {
+                    location.reload(true);
+                }, 500);
+            }
+        } catch (error) {
+            console.error('Error clearing site data:', error);
+            // Still try to reload even if there was an error
+            setTimeout(() => {
+                location.reload(true);
+            }, 500);
+        }
+    }
+
     // MAIN INITIALIZATION FUNCTION
     function init_one() {
         let { event, conf, view, show } = api,
             { bound, toInt, toFloat } = uc,
             { newBlank, newButton, newBoolean, newGroup, newInput } = uc,
             { newSelect, newLabel, newValue, newRow, newGCode, newDiv } = uc;
+
+        // Start loading timeout to detect infinite loading loop
+        let loadingTimeoutId = setTimeout(() => {
+            showLoadingTimeoutDialog();
+        }, LOADING_TIMEOUT_MS);
+
+        // Function to clear the loading timeout when loading completes successfully
+        api.clearLoadingTimeout = function() {
+            if (loadingTimeoutId) {
+                clearTimeout(loadingTimeoutId);
+                loadingTimeoutId = null;
+            }
+        };
 
         event.emit('init.one');
 
@@ -2020,7 +2106,8 @@ gapp.register("kiri.init", (root, exports) => {
             sdb.gdpr = Date.now();
         };
 
-        // lift curtain
+        // lift curtain and clear loading timeout
+        api.clearLoadingTimeout();
         $('curtain').style.display = 'none';
 
         // bind interface action elements
