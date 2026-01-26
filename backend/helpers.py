@@ -162,15 +162,28 @@ async def create_customer_product(
             print(f"Failed to fetch material/variant names: {str(e)}")
             # Continue with fallback values
 
-        # Create detailed description with all parameters
+        # Create simplified description (print settings now in metafields)
         description = f"""
-        <p><strong>Customer:</strong>{email}</p>
-        <p><strong>File:</strong> {filename}</p>
-        <p><strong>Material:</strong> {material_name}{" - " + variant_name if variant_name else ""}</p>
-        <p><strong>Infill:</strong> {infill}%</p>
-        <p><strong>Layer Height:</strong> {layer_height}mm</p>
-        <p><strong>Nozzle Size:</strong> {nozzle_size}mm</p>
+        <p><strong>Custom 3D printed product</strong></p>
+        <p>This is a custom 3D printed item created specifically for you.</p>
         """
+        
+        # Map nozzle_size to enum values
+        # Ensure nozzle_size is a float
+        try:
+            nozzle_size_float = float(nozzle_size)
+        except (TypeError, ValueError):
+            nozzle_size_float = 0.4  # Default to 0.4 if conversion fails
+        
+        nozzle_size_enum = str(nozzle_size_float)  # Convert to string for enum
+        valid_nozzle_sizes = ["0.2", "0.4", "0.6", "0.8"]
+        if nozzle_size_enum not in valid_nozzle_sizes:
+            # Find closest valid size
+            closest = min(valid_nozzle_sizes, key=lambda x: abs(float(x) - nozzle_size_float))
+            nozzle_size_enum = closest
+        
+        # Map layer_height to enum values
+        layer_height_enum = "Fine" if layer_height <= 0.15 else "Standard"
         
         # Create product input (without variants)
         product_input = {
@@ -179,6 +192,7 @@ async def create_customer_product(
             "handle": safe_handle,
             "vendor": "AD-Customs",
             "status": "UNLISTED",  # Make product active on online store
+            "productCategory": "gid://shopify/TaxonomyCategory/sg-7-17-1-17",  # Printing & Custom Print Services
             # "publications": [
             #     {
             #         "publicationId": "gid://shopify/Publication/261868257584"  # Online Store publication ID
@@ -189,6 +203,42 @@ async def create_customer_product(
                     "namespace": "custom",
                     "key": "owner",
                     "value": email,
+                    "type": "single_line_text_field"
+                },
+                {
+                    "namespace": "custom",
+                    "key": "file_name",
+                    "value": filename,
+                    "type": "single_line_text_field"
+                },
+                {
+                    "namespace": "custom",
+                    "key": "customer_email",
+                    "value": email,
+                    "type": "single_line_text_field"
+                },
+                {
+                    "namespace": "custom",
+                    "key": "print_material",
+                    "value": f"{material_name}{' - ' + variant_name if variant_name else ''}",
+                    "type": "single_line_text_field"
+                },
+                {
+                    "namespace": "custom",
+                    "key": "infill_percentage",
+                    "value": str(infill),
+                    "type": "number_integer"
+                },
+                {
+                    "namespace": "custom",
+                    "key": "nozzle_size",
+                    "value": nozzle_size_enum,
+                    "type": "single_line_text_field"
+                },
+                {
+                    "namespace": "custom",
+                    "key": "layer_height",
+                    "value": layer_height_enum,
                     "type": "single_line_text_field"
                 }
             ]
