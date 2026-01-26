@@ -50,6 +50,64 @@ gapp.register("kiri.init", (root, exports) => {
     const complexModelWarningSign = document.querySelector('#complex-model-warning-sign');
     const complexModelQuoteText = document.querySelector('#complex-model-in-quote');
 
+    // Loading screen tips for 3D printing
+    const loadingTips = [
+        "Proper bed leveling is crucial for successful prints. Check it regularly!",
+        "Print temperature varies by material: PLA ~200°C, ABS ~230°C, PETG ~240°C",
+        "Layer height affects print quality and time: smaller layers = better detail, longer prints",
+        "A heated bed helps prevent warping, especially for ABS and PETG materials",
+        "Use support structures for overhangs greater than 45 degrees",
+        "Calibrate your extruder steps to ensure accurate filament flow",
+        "Print speed affects quality: slower speeds generally produce better results",
+        "Clean your nozzle regularly to prevent clogs and inconsistent extrusion",
+        "Store filament in a dry place; moisture can ruin print quality",
+        "Retraction settings help reduce stringing between printed parts",
+        "First layer adhesion is critical: use glue stick, hairspray, or BuildTak as needed",
+        "Infill percentage doesn't always need to be high; 15-20% is often sufficient",
+        "Different infill patterns provide different strength characteristics",
+        "Wall thickness should be a multiple of your nozzle diameter for best results",
+        "Print orientation affects strength: layer lines are the weakest point",
+        "Use a brim or raft for parts with small footprints to improve adhesion",
+        "Cooling fans are essential for PLA but should be minimal for ABS",
+        "Keep your build plate clean for optimal first layer adhesion",
+        "Bridging performance improves with proper cooling and print speed adjustments",
+        "Nozzle size affects detail and print time: 0.4mm is a good all-around choice",
+        "Print two objects at once to allow cooling time between layers",
+        "Z-hop can prevent nozzle from dragging across your print during travel moves",
+        "Calibration prints like temperature towers help dial in settings for new filament",
+        "Post-processing techniques include sanding, acetone vapor smoothing, and painting",
+        "Enable 'combing' mode to keep travel moves within the print perimeter",
+        "Tune flow rate for each filament type to avoid over or under-extrusion",
+        "Keep spare nozzles on hand; they wear out over time, especially with abrasive filaments",
+        "Watch the first few layers to catch issues early before wasting material",
+        "Room temperature affects print quality, especially for ABS which is prone to warping",
+        "Consider using tree supports instead of linear supports for complex models"
+    ];
+
+    let tipRotationInterval = null;
+    let currentTipIndex = 0;
+
+    function startLoadingTips() {
+        const tipElement = DOC.getElementById('loading-tip');
+        if (!tipElement) return;
+
+        // Show first tip immediately
+        tipElement.textContent = loadingTips[currentTipIndex];
+
+        // Rotate tips every 4 seconds
+        tipRotationInterval = setInterval(() => {
+            currentTipIndex = (currentTipIndex + 1) % loadingTips.length;
+            tipElement.textContent = loadingTips[currentTipIndex];
+        }, 4000);
+    }
+
+    function stopLoadingTips() {
+        if (tipRotationInterval) {
+            clearInterval(tipRotationInterval);
+            tipRotationInterval = null;
+        }
+    }
+
     function settings() {
         return api.conf.get();
     }
@@ -799,6 +857,9 @@ gapp.register("kiri.init", (root, exports) => {
             { bound, toInt, toFloat } = uc,
             { newBlank, newButton, newBoolean, newGroup, newInput } = uc,
             { newSelect, newLabel, newValue, newRow, newGCode, newDiv } = uc;
+
+        // Start loading tips rotation
+        startLoadingTips();
 
         event.emit('init.one');
 
@@ -2021,6 +2082,7 @@ gapp.register("kiri.init", (root, exports) => {
         };
 
         // lift curtain
+        stopLoadingTips();
         $('curtain').style.display = 'none';
 
         // bind interface action elements
