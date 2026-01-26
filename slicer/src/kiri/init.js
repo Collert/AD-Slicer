@@ -52,7 +52,7 @@ gapp.register("kiri.init", (root, exports) => {
 
     // Loading screen tips for 3D printing
     const loadingTips = [
-        "PLA is biodegradable and great for decorative items, but not ideal for high-heat applications",
+        "PLA is eco-friendly and great for decorative items, but not ideal for high-heat applications",
         "ABS is more durable and heat-resistant than PLA, perfect for functional parts",
         "PETG combines the ease of PLA with the strength of ABS - a great all-around material",
         "Higher layer resolution means finer details but longer print times and higher costs",
@@ -78,7 +78,7 @@ gapp.register("kiri.init", (root, exports) => {
         "Post-processing options include sanding, painting, vapor smoothing, or epoxy coating",
         "Colors may vary slightly from screen to final print; request samples for critical matches",
         "UV-resistant materials are recommended for outdoor applications to prevent degradation",
-        "Food-safe materials exist, but printing process affects food safety - check requirements",
+        "Food-safe printing requires special materials, nozzles, and post-processing - consult requirements",
         "Larger prints take exponentially longer; consider splitting large models into parts",
         "Hollow designs save material and cost but may need drain holes for resin prints",
         "Layer lines can be minimized with higher resolution or smoothed through post-processing"
