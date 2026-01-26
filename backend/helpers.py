@@ -169,11 +169,17 @@ async def create_customer_product(
         """
         
         # Map nozzle_size to enum values
-        nozzle_size_enum = str(nozzle_size)  # Convert to string for enum
+        # Ensure nozzle_size is a float
+        try:
+            nozzle_size_float = float(nozzle_size)
+        except (TypeError, ValueError):
+            nozzle_size_float = 0.4  # Default to 0.4 if conversion fails
+        
+        nozzle_size_enum = str(nozzle_size_float)  # Convert to string for enum
         valid_nozzle_sizes = ["0.2", "0.4", "0.6", "0.8"]
         if nozzle_size_enum not in valid_nozzle_sizes:
             # Find closest valid size
-            closest = min(valid_nozzle_sizes, key=lambda x: abs(float(x) - nozzle_size))
+            closest = min(valid_nozzle_sizes, key=lambda x: abs(float(x) - nozzle_size_float))
             nozzle_size_enum = closest
         
         # Map layer_height to enum values
