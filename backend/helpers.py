@@ -240,11 +240,11 @@ async def create_customer_product(
         product_handle = product["handle"]
         
         # Update the product to set the category and metafields
-        # (productCategory not supported in ProductCreateInput, and metafields may be category-specific)
+        # (category not supported in ProductCreateInput, and metafields may be category-specific)
         try:
             update_mutation = """
-            mutation productUpdate($input: ProductInput!) {
-                productUpdate(input: $input) {
+            mutation productUpdate($product: ProductUpdateInput!) {
+                productUpdate(product: $product) {
                     product {
                         id
                         category {
@@ -260,9 +260,9 @@ async def create_customer_product(
             """
             
             update_variables = {
-                "input": {
+                "product": {
                     "id": product_id,
-                    "productCategory": "gid://shopify/TaxonomyCategory/sg-7-17-1-17",  # Printing & Custom Print Services
+                    "category": "gid://shopify/TaxonomyCategory/se-3-3-1",  # Printing & Custom Print Services
                     "metafields": [
                         {
                             "namespace": "custom",

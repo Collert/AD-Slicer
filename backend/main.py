@@ -125,7 +125,7 @@ async def save_model(
     # Create email-based folder (sanitize email for filesystem safety)
     safe_email = re.sub(r'[^\w\-_\.]', '_', email.strip().replace('@', '_at_'))
     email_folder = UPLOADS_DIR / safe_email
-    email_folder.mkdir(exist_ok=True)
+    email_folder.mkdir(exist_ok=True, mode=0o777)
     
     # Get file extension from uploaded file
     file_extension = Path(file.filename).suffix if file.filename else ".stl"

@@ -2299,7 +2299,7 @@ gapp.register("kiri.init", (root, exports) => {
             formData.append("email", e.target.email.value);
             formData.append("name", e.target.model_name.value);
 
-            const response = await fetch(`${devEnv ? "http://127.0.0.1:8282" : "https://api.slicer.adbits.ca"}/api/save-model`, {
+            const response = await fetch(`${devEnv ? "http://127.0.0.1:8001" : "https://api.slicer.adbits.ca"}/api/save-model`, {
                 method: "POST",
                 headers: { Accept: "application/json" },
                 body: formData
@@ -2359,7 +2359,7 @@ gapp.register("kiri.init", (root, exports) => {
             space.view.home();
 
             // Send to backend
-            const response = await fetch(`${devEnv ? "http://127.0.0.1:8282" : "https://api.slicer.adbits.ca"}/api/get-quote`, {
+            const response = await fetch(`${devEnv ? "http://127.0.0.1:8001" : "https://api.slicer.adbits.ca"}/api/get-quote`, {
                 method: "POST",
                 headers: { Accept: "application/json" },
                 body: formData
