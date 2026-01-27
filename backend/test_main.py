@@ -326,7 +326,8 @@ class TestSaveModelRoute:
             call_args = mock_post.call_args_list[0]
             actual_payload = call_args[1]['json']
             product_input = actual_payload['variables']['product']
-            assert 'productCategory' not in product_input
+            assert 'productCategory' not in product_input, \
+                "productCategory should not be included in ProductCreateInput as it's not a valid field"
             
 
 class TestPingRoute:
