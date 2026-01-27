@@ -194,14 +194,16 @@ class TestSaveModelRoute:
             assert product_handle == "test-product-handle"
             assert variant_id == "gid://shopify/ProductVariant/67890"
             
-            # Verify product creation doesn't include productCategory
+            # Verify product creation doesn't include productCategory or metafields
             create_call_args = mock_post.call_args_list[0]
             create_payload = create_call_args[1]['json']
             product_input = create_payload['variables']['product']
             assert 'productCategory' not in product_input, \
                 "productCategory should not be included in ProductCreateInput as it's not a valid field"
+            assert 'metafields' not in product_input, \
+                "metafields should not be included during creation; they should be set after category assignment"
             
-            # Verify product update DOES include productCategory
+            # Verify product update DOES include productCategory AND metafields
             update_call_args = mock_post.call_args_list[1]
             update_payload = update_call_args[1]['json']
             
@@ -216,6 +218,19 @@ class TestSaveModelRoute:
                 "Product category should be set to 'Printing & Custom Print Services'"
             assert update_input['id'] == product_id, \
                 "Product update should target the created product"
+            
+            # Verify metafields are set in the update mutation (after category)
+            assert 'metafields' in update_input, \
+                "metafields should be included in the productUpdate mutation after category is set"
+            metafields = update_input['metafields']
+            assert len(metafields) == 7, "Should have 7 metafields"
+            
+            # Verify specific metafields are present
+            metafield_keys = [mf['key'] for mf in metafields]
+            expected_keys = ['owner', 'file_name', 'customer_email', 'print_material', 
+                           'infill_percentage', 'nozzle_size', 'layer_height']
+            for key in expected_keys:
+                assert key in metafield_keys, f"Metafield '{key}' should be present"
             
     @pytest.mark.asyncio
     async def test_create_customer_product_excludes_productCategory(self):
@@ -354,17 +369,18 @@ class TestSaveModelRoute:
             call_args = mock_post.call_args_list[0]
             actual_payload = call_args[1]['json']
             
-            # Verify that productCategory is NOT in the product input
+            # Verify that productCategory and metafields are NOT in the product creation input
             product_input = actual_payload['variables']['product']
             assert 'productCategory' not in product_input, \
                 "productCategory should not be included in ProductCreateInput as it's not a valid field"
+            assert 'metafields' not in product_input, \
+                "metafields should not be included during creation; they should be set after category assignment"
             
             # Verify that essential fields are present
             assert product_input['title'] == "Test Product"
             assert product_input['handle'] is not None
             assert product_input['vendor'] == "AD-Customs"
             assert product_input['status'] == "UNLISTED"
-            assert 'metafields' in product_input
             
     @pytest.mark.asyncio 
     async def test_save_model_endpoint_integration(self, client, sample_stl_file, sample_screenshot):

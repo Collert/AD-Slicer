@@ -185,7 +185,8 @@ async def create_customer_product(
         # Map layer_height to enum values
         layer_height_enum = "Fine" if layer_height <= 0.15 else "Standard"
         
-        # Create product input (without variants)
+        # Create product input (without variants and without metafields)
+        # Metafields will be added after category assignment since they may be category-specific
         product_input = {
             "title": product_name,
             "descriptionHtml": description,
@@ -198,50 +199,6 @@ async def create_customer_product(
             #         "publicationId": "gid://shopify/Publication/261868257584"  # Online Store publication ID
             #     }
             # ],
-            "metafields": [
-                {
-                    "namespace": "custom",
-                    "key": "owner",
-                    "value": email,
-                    "type": "single_line_text_field"
-                },
-                {
-                    "namespace": "custom",
-                    "key": "file_name",
-                    "value": filename,
-                    "type": "single_line_text_field"
-                },
-                {
-                    "namespace": "custom",
-                    "key": "customer_email",
-                    "value": email,
-                    "type": "single_line_text_field"
-                },
-                {
-                    "namespace": "custom",
-                    "key": "print_material",
-                    "value": f"{material_name}{' - ' + variant_name if variant_name else ''}",
-                    "type": "single_line_text_field"
-                },
-                {
-                    "namespace": "custom",
-                    "key": "infill_percentage",
-                    "value": str(infill),
-                    "type": "number_integer"
-                },
-                {
-                    "namespace": "custom",
-                    "key": "nozzle_size",
-                    "value": nozzle_size_enum,
-                    "type": "single_line_text_field"
-                },
-                {
-                    "namespace": "custom",
-                    "key": "layer_height",
-                    "value": layer_height_enum,
-                    "type": "single_line_text_field"
-                }
-            ]
         }
         
         # Add manual-review tag if the model is complex
@@ -282,7 +239,8 @@ async def create_customer_product(
         product_id = product["id"]
         product_handle = product["handle"]
         
-        # Update the product to set the category (productCategory not supported in ProductCreateInput)
+        # Update the product to set the category and metafields
+        # (productCategory not supported in ProductCreateInput, and metafields may be category-specific)
         try:
             update_mutation = """
             mutation productUpdate($input: ProductInput!) {
@@ -304,7 +262,51 @@ async def create_customer_product(
             update_variables = {
                 "input": {
                     "id": product_id,
-                    "productCategory": "gid://shopify/TaxonomyCategory/sg-7-17-1-17"  # Printing & Custom Print Services
+                    "productCategory": "gid://shopify/TaxonomyCategory/sg-7-17-1-17",  # Printing & Custom Print Services
+                    "metafields": [
+                        {
+                            "namespace": "custom",
+                            "key": "owner",
+                            "value": email,
+                            "type": "single_line_text_field"
+                        },
+                        {
+                            "namespace": "custom",
+                            "key": "file_name",
+                            "value": filename,
+                            "type": "single_line_text_field"
+                        },
+                        {
+                            "namespace": "custom",
+                            "key": "customer_email",
+                            "value": email,
+                            "type": "single_line_text_field"
+                        },
+                        {
+                            "namespace": "custom",
+                            "key": "print_material",
+                            "value": f"{material_name}{' - ' + variant_name if variant_name else ''}",
+                            "type": "single_line_text_field"
+                        },
+                        {
+                            "namespace": "custom",
+                            "key": "infill_percentage",
+                            "value": str(infill),
+                            "type": "number_integer"
+                        },
+                        {
+                            "namespace": "custom",
+                            "key": "nozzle_size",
+                            "value": nozzle_size_enum,
+                            "type": "single_line_text_field"
+                        },
+                        {
+                            "namespace": "custom",
+                            "key": "layer_height",
+                            "value": layer_height_enum,
+                            "type": "single_line_text_field"
+                        }
+                    ]
                 }
             }
             
@@ -313,23 +315,23 @@ async def create_customer_product(
                 "variables": update_variables
             }
             
-            print(f"Setting product category for {product_id}...")
+            print(f"Setting product category and metafields for {product_id}...")
             update_resp = await client.post(url, headers=headers, json=update_payload)
             update_resp.raise_for_status()
             update_data = update_resp.json()
             
             if "errors" in update_data:
-                print(f"Failed to set product category: {update_data['errors']}")
+                print(f"Failed to set product category and metafields: {update_data['errors']}")
                 # Don't fail the entire operation if category update fails
             else:
                 update_user_errors = update_data.get("data", {}).get("productUpdate", {}).get("userErrors", [])
                 if update_user_errors:
-                    print(f"Product category update errors: {update_user_errors}")
+                    print(f"Product category/metafields update errors: {update_user_errors}")
                 else:
-                    print(f"Successfully set product category for {product_id}")
+                    print(f"Successfully set product category and metafields for {product_id}")
                     
         except Exception as e:
-            print(f"Failed to set product category for {product_id}: {str(e)}")
+            print(f"Failed to set product category and metafields for {product_id}: {str(e)}")
             # Don't fail the entire operation if category update fails
         
         # Now publish the product to the online store using the new publishablePublish mutation
