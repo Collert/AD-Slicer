@@ -282,6 +282,56 @@ async def create_customer_product(
         product_id = product["id"]
         product_handle = product["handle"]
         
+        # Update the product to set the category (productCategory not supported in ProductCreateInput)
+        try:
+            update_mutation = """
+            mutation productUpdate($input: ProductInput!) {
+                productUpdate(input: $input) {
+                    product {
+                        id
+                        category {
+                            id
+                        }
+                    }
+                    userErrors {
+                        field
+                        message
+                    }
+                }
+            }
+            """
+            
+            update_variables = {
+                "input": {
+                    "id": product_id,
+                    "productCategory": "gid://shopify/TaxonomyCategory/sg-7-17-1-17"  # Printing & Custom Print Services
+                }
+            }
+            
+            update_payload = {
+                "query": update_mutation,
+                "variables": update_variables
+            }
+            
+            print(f"Setting product category for {product_id}...")
+            update_resp = await client.post(url, headers=headers, json=update_payload)
+            update_resp.raise_for_status()
+            update_data = update_resp.json()
+            
+            if "errors" in update_data:
+                print(f"Failed to set product category: {update_data['errors']}")
+                # Don't fail the entire operation if category update fails
+            else:
+                update_user_errors = update_data.get("data", {}).get("productUpdate", {}).get("userErrors", [])
+                if update_user_errors:
+                    print(f"Product category update errors: {update_user_errors}")
+                else:
+                    print(f"Successfully set product category for {product_id}")
+                    
+        except Exception as e:
+            print(f"Failed to set product category for {product_id}: {str(e)}")
+            # Don't fail the entire operation if category update fails
+        
         # Now publish the product to the online store using the new publishablePublish mutation
         try:
             publish_mutation = """

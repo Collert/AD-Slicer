@@ -56,6 +56,168 @@ class TestSaveModelRoute:
     """Test suite for the /api/save-model endpoint"""
     
     @pytest.mark.asyncio
+    async def test_create_customer_product_sets_category_via_update(self):
+        """
+        Test that the productCategory is set via productUpdate mutation after creation.
+        ProductCategory is not supported in ProductCreateInput, but can be set via ProductInput.
+        """
+        mock_response_data = {
+            "data": {
+                "productCreate": {
+                    "product": {
+                        "id": "gid://shopify/Product/12345",
+                        "title": "Test Product",
+                        "handle": "test-product-handle",
+                        "variants": {
+                            "edges": [
+                                {
+                                    "node": {
+                                        "id": "gid://shopify/ProductVariant/67890"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "userErrors": []
+                }
+            }
+        }
+        
+        # Mock product update response
+        update_response_data = {
+            "data": {
+                "productUpdate": {
+                    "product": {
+                        "id": "gid://shopify/Product/12345",
+                        "category": {
+                            "id": "gid://shopify/TaxonomyCategory/sg-7-17-1-17"
+                        }
+                    },
+                    "userErrors": []
+                }
+            }
+        }
+        
+        # Mock the httpx client
+        with patch('helpers.httpx.AsyncClient') as MockClient:
+            mock_client_instance = MagicMock()
+            mock_post = AsyncMock()
+            mock_get = AsyncMock()
+            mock_put = AsyncMock()
+            
+            # Set up mock responses
+            # For product creation
+            product_create_response = MagicMock()
+            product_create_response.status_code = 200
+            product_create_response.json.return_value = mock_response_data
+            product_create_response.raise_for_status = MagicMock()
+            
+            # For product update (category)
+            product_update_response = MagicMock()
+            product_update_response.status_code = 200
+            product_update_response.json.return_value = update_response_data
+            product_update_response.raise_for_status = MagicMock()
+            
+            # For publish mutation
+            publish_response = MagicMock()
+            publish_response.status_code = 200
+            publish_response.json.return_value = {
+                "data": {
+                    "publishablePublish": {
+                        "userErrors": []
+                    }
+                }
+            }
+            publish_response.raise_for_status = MagicMock()
+            
+            # For variant update
+            variant_update_response = MagicMock()
+            variant_update_response.status_code = 200
+            variant_update_response.json.return_value = {
+                "variant": {
+                    "id": "gid://shopify/ProductVariant/67890",
+                    "price": "10.00"
+                }
+            }
+            variant_update_response.raise_for_status = MagicMock()
+            
+            # Configure mock responses in order
+            mock_post.side_effect = [
+                product_create_response,  # First POST for product creation
+                product_update_response,   # Second POST for category update
+                publish_response,          # Third POST for publishing
+            ]
+            mock_put.return_value = variant_update_response
+            
+            # For material/variant name fetches
+            material_response = MagicMock()
+            material_response.status_code = 200
+            material_response.json.return_value = {
+                "product": {"title": "Test Material"}
+            }
+            
+            variant_response = MagicMock()
+            variant_response.status_code = 200
+            variant_response.json.return_value = {
+                "variant": {"title": "Test Variant"}
+            }
+            
+            mock_get.side_effect = [material_response, variant_response]
+            
+            mock_client_instance.post = mock_post
+            mock_client_instance.get = mock_get
+            mock_client_instance.put = mock_put
+            mock_client_instance.__aenter__ = AsyncMock(return_value=mock_client_instance)
+            mock_client_instance.__aexit__ = AsyncMock(return_value=None)
+            
+            MockClient.return_value = mock_client_instance
+            
+            # Call the function
+            product_id, product_handle, variant_id = await create_customer_product(
+                email="test@example.com",
+                product_name="Test Product",
+                material="gid://shopify/Product/111",
+                variant="gid://shopify/ProductVariant/222",
+                infill=15,
+                layer_height=0.2,
+                nozzle_size=0.4,
+                filename="test.stl",
+                file_path="/tmp/test.stl",
+                weight=100.0,
+                price=10.00,
+                screenshot_path=None,
+                complex=False
+            )
+            
+            # Verify the function succeeded
+            assert product_id == "gid://shopify/Product/12345"
+            assert product_handle == "test-product-handle"
+            assert variant_id == "gid://shopify/ProductVariant/67890"
+            
+            # Verify product creation doesn't include productCategory
+            create_call_args = mock_post.call_args_list[0]
+            create_payload = create_call_args[1]['json']
+            product_input = create_payload['variables']['product']
+            assert 'productCategory' not in product_input, \
+                "productCategory should not be included in ProductCreateInput as it's not a valid field"
+            
+            # Verify product update DOES include productCategory
+            update_call_args = mock_post.call_args_list[1]
+            update_payload = update_call_args[1]['json']
+            
+            # Check that this is the productUpdate mutation
+            assert 'productUpdate' in update_payload['query']
+            
+            # Verify the category is being set
+            update_input = update_payload['variables']['input']
+            assert 'productCategory' in update_input, \
+                "productCategory should be included in ProductInput for the update mutation"
+            assert update_input['productCategory'] == "gid://shopify/TaxonomyCategory/sg-7-17-1-17", \
+                "Product category should be set to 'Printing & Custom Print Services'"
+            assert update_input['id'] == product_id, \
+                "Product update should target the created product"
+            
+    @pytest.mark.asyncio
     async def test_create_customer_product_excludes_productCategory(self):
         """
         Test that the productCategory field is NOT included in the GraphQL mutation.
@@ -97,6 +259,21 @@ class TestSaveModelRoute:
             product_create_response.json.return_value = mock_response_data
             product_create_response.raise_for_status = MagicMock()
             
+            # For product update (category)
+            product_update_response = MagicMock()
+            product_update_response.status_code = 200
+            product_update_response.json.return_value = {
+                "data": {
+                    "productUpdate": {
+                        "product": {
+                            "id": "gid://shopify/Product/12345"
+                        },
+                        "userErrors": []
+                    }
+                }
+            }
+            product_update_response.raise_for_status = MagicMock()
+            
             # For publish mutation
             publish_response = MagicMock()
             publish_response.status_code = 200
@@ -123,7 +300,8 @@ class TestSaveModelRoute:
             # Configure mock responses in order
             mock_post.side_effect = [
                 product_create_response,  # First POST for product creation
-                publish_response,          # Second POST for publishing
+                product_update_response,   # Second POST for category update
+                publish_response,          # Third POST for publishing
             ]
             mock_put.return_value = variant_update_response
             
@@ -229,6 +407,21 @@ class TestSaveModelRoute:
             product_create_response.json.return_value = mock_response_data
             product_create_response.raise_for_status = MagicMock()
             
+            # For product update (category)
+            product_update_response = MagicMock()
+            product_update_response.status_code = 200
+            product_update_response.json.return_value = {
+                "data": {
+                    "productUpdate": {
+                        "product": {
+                            "id": "gid://shopify/Product/12345"
+                        },
+                        "userErrors": []
+                    }
+                }
+            }
+            product_update_response.raise_for_status = MagicMock()
+            
             publish_response = MagicMock()
             publish_response.status_code = 200
             publish_response.json.return_value = {
@@ -263,6 +456,7 @@ class TestSaveModelRoute:
             
             mock_post.side_effect = [
                 product_create_response,
+                product_update_response,
                 publish_response,
                 image_response,
             ]
