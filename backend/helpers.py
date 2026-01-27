@@ -192,7 +192,7 @@ async def create_customer_product(
             "handle": safe_handle,
             "vendor": "AD-Customs",
             "status": "UNLISTED",  # Make product active on online store
-            "productCategory": "gid://shopify/TaxonomyCategory/sg-7-17-1-17",  # Printing & Custom Print Services
+            # Note: productCategory is not supported in ProductCreateInput
             # "publications": [
             #     {
             #         "publicationId": "gid://shopify/Publication/261868257584"  # Online Store publication ID
