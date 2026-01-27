@@ -5,3 +5,5 @@ httpx
 shopifyapi
 cryptography
 python-dotenv
+pytest
+pytest-asyncio
