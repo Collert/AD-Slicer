@@ -2275,6 +2275,14 @@ gapp.register("kiri.init", (root, exports) => {
 
         let finalFormData;
         const finalSubmitButton = document.querySelector("#final-submit-button");
+        
+        // Load email from localStorage when page loads
+        const emailInput = document.querySelector("#email");
+        const savedEmail = localStorage.getItem("userEmail");
+        if (savedEmail && emailInput) {
+            emailInput.value = savedEmail;
+        }
+        
         document.querySelector("#login-form").addEventListener("submit", async e => {
             e.preventDefault();
 
@@ -2298,6 +2306,9 @@ gapp.register("kiri.init", (root, exports) => {
             formData.append("screenshot", screenshotBlob, "model-view.png");
             formData.append("email", e.target.email.value);
             formData.append("name", e.target.model_name.value);
+            
+            // Save email to localStorage
+            localStorage.setItem("userEmail", e.target.email.value);
 
             const response = await fetch(`${devEnv ? "http://127.0.0.1:8001" : "https://api.slicer.adbits.ca"}/api/save-model`, {
                 method: "POST",
