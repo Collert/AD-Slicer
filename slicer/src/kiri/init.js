@@ -2280,7 +2280,11 @@ gapp.register("kiri.init", (root, exports) => {
         const emailInput = document.querySelector("#email");
         const savedEmail = localStorage.getItem("userEmail");
         if (savedEmail && emailInput) {
-            emailInput.value = savedEmail;
+            // Basic email validation before populating
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(savedEmail)) {
+                emailInput.value = savedEmail;
+            }
         }
         
         document.querySelector("#login-form").addEventListener("submit", async e => {
